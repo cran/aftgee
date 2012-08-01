@@ -1,0 +1,45 @@
+2012-07-12  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Added Prentice-Wilcoxon weight
+	* Sandwich variance estimator for multivariate
+
+2012-06-21  Sy Han Chiou <steven.chiou@uconn.edu>
+	* For aftgee function, added lsonly switch.
+
+2012-06-18  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Added case-cohort weights for aftgee function.
+	* Fixed prepX function
+	* Fixed interception issue
+	* Added warnings
+
+2012-06-06  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Replace "nfsane" by "BBsolve"
+	* Output whether An is invertible 
+
+2012-05-19  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Added closed form variance estimation, zlc, hc, isc, for "logrank"
+
+2012-05-15  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Added converage at output
+
+2012-05-15  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Added "logrank" weight
+	* Package depend on library(BB)
+	* Variance estimation for "logrank" fixed for "mult", "zle" and "ise".
+
+2012-05-07  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Huang's approach with non smoothed estimating equation does not seem to have a converaged solution, this might due to the scales/order.
+	* SiFun, sfun, etc are modiflied based on our paper. 
+
+2012-05-04  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Huang's approach with smoothed estimating equation.
+	* Zeng and Lin with non smoothed estimating equation.
+
+2012-05-01  Sy Han Chiou  <steven.chiou@uconn.edu>
+	* Intend to add log-rank weight.
+	* H and ZL on non-smoothed estimating equation.
+
+2012-04-22  Sy Han Chiou  <steven.chiou@uconn.edu>
+	
+	* Modified aftgee.est so that margin can be at no specific order.
+        * Added nwtco example.
+  

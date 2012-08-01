@@ -1,0 +1,13 @@
+e3156fe1a90ab79e1e05f6907e04da4a *ChangeLog
+56d1bdfd686cc22b6b609ebf44eacea3 *DESCRIPTION
+3c36cc990f61df7ad6593215618f8cae *NAMESPACE
+c8f3bd8024a5b3e2506b39e2088c9d54 *R/aftgee.R
+56ae93d4c4ce8a00dd4d6848ef24de27 *R/smoothRR.R
+8a6e47424421e278799ec529231323f6 *R/summary.R
+56ee8209a3b461fd5241aab1a9cd9ace *R/zzz.R
+8e4eeb5e7f6c3b3e0d323dd68dbfe23e *man/aftgee-package.Rd
+fbb49fd0c25506e24f82779521bf4d69 *man/aftgee.Rd
+8f58802a40b26eb8de36314173d124fa *man/aftgee.control.Rd
+b195f8d43e9ef3cb42bff0de461185ce *man/prepX.Rd
+f0625c42a9cbbfb6d423485213399507 *man/smoothrr.Rd
+b7b8b40f0148baf7c4a725951327ccd0 *src/aftgee.c
