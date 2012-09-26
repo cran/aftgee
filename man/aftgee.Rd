@@ -17,12 +17,10 @@ aftgee(formula, data, subset, id,
        margin  = NULL,
        corstr = "independence",
        contrasts = NULL,
-       M = 100,
+       nres = 100,
        initial = "lm",
-       lsonly = TRUE, 
-       iterate = TRUE,
+       iniEst = TRUE, 
        variance = "ISMB",
-       iterMethod = "resampling",
        res = TRUE,
        control = aftgee.control())
 }
@@ -48,7 +46,7 @@ aftgee(formula, data, subset, id,
     \code{'userdefined'}, and
     \code{'fixed'}
   }
-  \item{M}{ is the sample size for resampling estimation of the variance
+  \item{nres}{ is the sample size for resampling estimation of the variance
   }
   \item{contrasts}{ an optional list. 
   }
@@ -57,11 +55,9 @@ aftgee(formula, data, subset, id,
     \code{"lm"} for simple linear regression,
     \code{"srrgehan"} for smoothed gehan weight estimator.
   }
-  \item{lsonly}{ determine whether to compute variance for initial value
+  \item{iniEst}{ determine whether to compute variance for initial value
   }
   \item{weight}{ is a weight vector for covariates; default at 1.
-  }
-  \item{iterate}{ determine whether the iterative procedure is processed when smoothgehan is chosen; default at TRUE.
   }
   \item{variance}{ a character string specifying the covariance estimating method.
         The following are permitted:
@@ -73,8 +69,6 @@ aftgee(formula, data, subset, id,
         \code{'ISCF'}: Johnson and Strwderman's sandwish variance estimates with closed form Si,
         \code{'ISMB'}: Johnson and Strwderman's sandwish variance estimates with empirical Si,
         \code{'js'}: Johnson and Strwderman's iterating approach.
-  }
-  \item{iterMethod}{ iterating precedure method
   }
   \item{margin}{ a sformula vector; default at 1.
   }
@@ -134,6 +128,7 @@ aftgee(formula, data, subset, id,
 \keyword{ aftgee }
 
 \examples{
+library(survival)
 data(kidney)
 fit <- aftgee(Surv(time, status) ~ age + sex, id = id, data = kidney, initial = "srrgehan")
 fit
@@ -155,9 +150,9 @@ summary(fit)
 ## c <- runif(400, 0, 10)
 ## delta <- (time < c) * 1
 ## y <- pmin(time, c)
-## foo <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", M=1)
-## foo2 <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", margin = marg, res = FALSE, M=50)
-## foo3 <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", margin = marg, res = TRUE, M=50)
+## foo <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", nres = 1)
+## foo2 <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", margin = marg, res = FALSE, nres = 50)
+## foo3 <- aftgee(Surv(y, delta) ~ x, id = id, initial = "srrgehan", margin = marg, res = TRUE, nres = 50)
 ## summary(foo)
 ## summary(foo2)
 ## summary(foo3)

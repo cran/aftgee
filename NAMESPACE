@@ -1,8 +1,12 @@
 useDynLib(aftgee)
-export(aftgee, smoothrr, prepX)
+export(aftgee, smoothrr, aftgee.prepX)
 importFrom("MASS", ginv)	
-# export(aftgee.est, aftgee.fit, prepX)
-# export(huangFun, viClo, viEmp, aftgee.fit, smoothrr.fit, uilogFun, uiFun, zlFun, isFun, abarlogfun, abargehanfun, get_si, summary.aftgee, print.summary.aftgee)
+importFrom("BB", BBsolve)
+importFrom("survival", Surv, survfit)
+importFrom("geepack", geese, geese.fit)
+
+## export(aftgee.est, aftgee.fit, aftgee.prepX)
+## export(huangFun, viClo, viEmp, aftgee.fit, smoothrr.fit, uilogFun, uiFun, zlFun, isFun, abarlogfun, abargehanfun, get_si, summary.aftgee, print.summary.aftgee, summary.smoothrr, get_vi)
 
 S3method(print, aftgee)
 S3method(summary, aftgee)

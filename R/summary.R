@@ -22,17 +22,20 @@ summary.aftgee <- function(object,...){
   rownames(TAB.gee) <- rownames(z$coefficients)
 
   ## initial part
-  if ( z$initial != "lm" & z$lsonly == FALSE & !(is.numeric(z$initial))) {
-    est.ini <- z$coef.init
-    se.ini <- z$sd.init
-    est.temp.ini <- ifelse(se.ini == "NaN", "NaN", est.ini)
+  if ( z$initial != "lm" & z$iniEst == FALSE & !(is.numeric(z$initial))) {
+
+
+      est.ini <- z$coef.init[which(is.na(z$sd.init) == FALSE)]
+      se.ini <- z$sd.init[which(is.na(z$sd.init) == FALSE)]
+      est.temp.ini <- ifelse(se.ini == "NaN", "NaN", est.ini)
     z.val.ini <- as.numeric(est.temp.ini)/as.numeric(se.ini)
     TAB.ini <- cbind(Estimate = est.ini, StdErr = se.ini, z.value = z.val.ini, p.value = 2 * pnorm(-abs(z.val.ini)))
-    rownames(TAB.ini) <- rownames(z$coefficients)
+    rownames(TAB.ini) <- rownames(z$coefficients)[which(is.na(z$sd.init) == FALSE)]
   }
-
+  inirow <- nrow(TAB.ini)
+  geerow <- nrow(TAB.gee)
   TAB <- rbind(TAB.ini, TAB.gee)
-  res <- list(call=object$call, coefficients=TAB, initial = z$initial, lsonly = z$lsonly, est.ini = z$coef.init)
+  res <- list(call=object$call, coefficients=TAB, initial = z$initial, iniEst = z$iniEst, est.ini = z$coef.init, inirow = inirow, geerow = geerow)
   class(res) <- "summary.aftgee"
   res
 }
@@ -64,19 +67,18 @@ summary.smoothrr <- function(object,...){
 
 
 print.summary.aftgee <- function(x, ...){
-  p <- nrow(x$coefficients)
   cat("Call:\n")
   print(x$call)
   cat("\n")
-  if (x$lsonly == FALSE) {
+  if (x$iniEst == FALSE) {
       if (x$initial != "lm") {
           cat("Gehan Estimator:")
           cat("\n")
-          printCoefmat(x$coefficients[1:(p/2),], P.values = TRUE, has.Pvalue = TRUE)
+          printCoefmat(x$coefficients[1:x$inirow,], P.values = TRUE, has.Pvalue = TRUE)
           cat("\n")
           cat("AFTGEE Estimator")
           cat("\n")
-          printCoefmat(x$coefficients[(p/2+1):p,], P.values = TRUE, has.Pvalue = TRUE)
+          printCoefmat(x$coefficients[(x$inirow + 1):(x$inirow + x$geerow),], P.values = TRUE, has.Pvalue = TRUE)
       }
       else {
           cat("AFTGEE Estimator")
@@ -84,7 +86,7 @@ print.summary.aftgee <- function(x, ...){
           printCoefmat(x$coefficients, P.values = TRUE, has.Pvalue = TRUE)
       }
   }
-  if (x$lsonly == TRUE | is.numeric(x$initial)) {
+  if (x$iniEst == TRUE | is.numeric(x$initial)) {
       cat("Gehan Initial Value:")
       cat("\n")
       cat(round(as.numeric(x$est.ini), digits = 7))

@@ -10,10 +10,10 @@ smoothrr(formula, data, subset, id,
          Sigma = NULL,
          weight = NULL,
          binit = NULL,
-         M = 100, pn = 1,
+         nres = 100, p0 = 1, p1 = 1,
          contrasts = NULL,
          variance = "ISMB",
-	 rank = "gehan",
+	 rankweight = "gehan",
          control = aftgee.control())
 }
 \arguments{
@@ -48,10 +48,12 @@ smoothrr(formula, data, subset, id,
     \code{'ISMB'}: Johnson and Strwderman's sandwish variance estimates with empirical Si,
     \code{'js'}: Johnson and Strwderman's iterating approach.
   }
-  \item{rank}{ A character string specifying between "gehan" and "logrank" weight.}
-  \item{M}{Resampling size. When M = 0, only the beta estimate will be displayed.
+  \item{rankweight}{ A character string specifying between "gehan" and "logrank" weight.}
+  \item{nres}{Resampling size. When M = 0, only the beta estimate will be displayed.
   }
-  \item{pn}{Case-cohort size ratio.
+  \item{p0}{Case-cohort size ratio.
+  }
+  \item{p1}{Case-cohort size ratio.
   }
   \item{control}{Controls maxiter, abstol and restol.
   }
@@ -94,11 +96,13 @@ smoothrr(formula, data, subset, id,
 \examples{
 
 #### kidney data
+library(survival)
 data(kidney)
-foo <- smoothrr(Surv(log(time), status) ~ age + sex - 1, id = id, data = kidney, variance = c("js", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB"), M = 10)
+foo <- smoothrr(Surv(log(time), status) ~ age + sex - 1, id = id, data = kidney, variance = c("MB", "ISMB"), nres = 10)
 foo
 
 #### nwtco data
+library(survival)
 data(nwtco)
 subinx <- sample(1:nrow(nwtco), 668, replace = FALSE)
 nwtco$subcohort <- 0
@@ -113,7 +117,7 @@ nwtco$stage3 = ifelse(nwtco$stage == 3, 1, 0)
 nwtco$stage4 = ifelse(nwtco$stage == 4, 1, 0)
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
-fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, weight = hi, data = sub, M = 7, variance = c("MB", "ISMB"), subset = stage4 == 1)
+fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, weight = hi, data = sub, nres = 7, variance = c("MB", "ISMB"), subset = stage4 == 1)
 summary(fit)
 } 
 

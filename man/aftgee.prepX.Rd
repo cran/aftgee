@@ -1,5 +1,5 @@
-\name{prepX}
-\alias{prepX}
+\name{aftgee.prepX}
+\alias{aftgee.prepX}
 \title{
   Prepare Block Matrix for AFTGEE with multiple margins
 }
@@ -7,7 +7,7 @@
   Prepare block matrix to be fitted with aftgee()
 }
 \usage{
-prepX(xmat, margin, name = NULL)
+aftgee.prepX(xmat, margin, name = NULL)
 }
 \arguments{
   \item{xmat}{ a matrix to be prepared into a block diagonal matrix.
@@ -34,10 +34,11 @@ prepX(xmat, margin, name = NULL)
   Sy Han Chiou, Sankwook Kang, Jun Yan
 }
 \examples{
+library(survival)
 data(kidney)
 x = cbind(kidney$sex, kidney$age)
 ## head(x)
 marg = rep(1:2, 38)
-xmat = prepX(x, marg, c("sex", "age"))
+xmat = aftgee.prepX(x, marg, c("sex", "age"))
 ## head(xmat)
 }

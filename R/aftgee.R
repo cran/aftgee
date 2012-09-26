@@ -3,10 +3,8 @@ aftgee <- function(formula, data, subset, id,
                    margin = NULL,
                    corstr="independence",
                    contrasts = NULL,
-                   M = 100, initial = "lm", lsonly = TRUE,
-                   iterate = TRUE,
+                   nres = 100, initial = "lm", iniEst = TRUE,
                    variance = "ISMB",
-                   iterMethod = "resampling",
                    res = TRUE,
                    control = aftgee.control()
                    ) {
@@ -32,10 +30,11 @@ aftgee <- function(formula, data, subset, id,
   margin <- model.extract(m, margin)
   if (is.null(margin)) margin <- rep(1, N)
   xnames <- colnames(x)[-1]
-  out <- aftgee.fit(y = y, x = x, id = id, corstr = corstr, M = M, initial = initial, lsonly = lsonly, weight = weight, iterate = iterate, iterMethod = iterMethod, margin = margin, res = res, variance = variance, control = control)
+  out <- aftgee.fit(y = y, x = x, id = id, corstr = corstr, nres = nres, initial = initial, iniEst = iniEst,
+                    weight = weight, margin = margin, res = res, variance = variance, control = control)
   out$call <- scall
   out$var.name <- xnames
-  out$lsonly <- lsonly
+  out$iniEst <- iniEst
   ## rownames(out$coefficients) <- rep(c("Intercept", xnames), length(unique(margin)))
   colnames(out$coefficients) <- c("initial", "AFTGEE")
   class(out) <- "aftgee"
@@ -46,8 +45,7 @@ aftgee.fit <- function(y, x, id, corstr="independence",
                        weight = rep(1, nrow(x)),
                        margin = rep(1, nrow(x)),
                        variance = "js",
-                       M = 100, initial = "lm", lsonly = TRUE,
-                       iterate = TRUE, iterMethod = "resampling",
+                       nres = 100, initial = "lm", iniEst = TRUE,
                        res = TRUE,
                        control = aftgee.control()) {
   x <- as.matrix(x)
@@ -91,8 +89,8 @@ aftgee.fit <- function(y, x, id, corstr="independence",
       if (initial == "srrgehan") {
           varName <- variance[1]
           vind <- match(variance[1], c("MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js"))
-          ls <- ifelse(lsonly == TRUE, 0, M)
-          first <- smoothrr(Surv(exp(Y), delta) ~ X - 1, M = ls, variance = variance[1], weight = weight, control = control, id = id)
+          nresls <- ifelse(iniEst == TRUE, 0, nres)
+          first <- smoothrr(Surv(exp(Y), delta) ~ X - 1, nres = nresls, variance = variance[1], weight = weight, control = control, id = id)
           firstBeta <- first$beta
           firstSdMat <- first$covmat[[vind]]
           if (is.na(firstSdMat)[1] == FALSE) {
@@ -116,15 +114,15 @@ aftgee.fit <- function(y, x, id, corstr="independence",
   }
   initialValue <- list(beta = firstBeta, sd = firstSd, sdMat = firstSdMat)
   result <- aftgee.est(Y, x, delta, initialValue$beta, id, corstr, rep(1, length(Y)), margin, res, weight, control)
-  if (M > 0) {
-    sample <- matrix(0, nrow=M, ncol = length(result$beta))
-    for (i in 1:M){
+  if (nres > 0) {
+    sample <- matrix(0, nrow = nres, ncol = length(result$beta))
+    for (i in 1:nres){
       Z <- as.vector(rep(rexp(n,1), time = clsize))
       sample[i,] <- aftgee.est(Y, x, delta, result$beta, id, corstr, Z, margin, res, weight, control)$beta
     }
     vhat <- var(sample)
   }
-  if (M == 0) {
+  if (nres == 0) {
     vhat <- NULL
   }
   ini.beta <- c(initialValue$beta)
@@ -155,8 +153,9 @@ aftgee.control <- function(maxiter = 30,
        trace = trace)
 }
 
-prepX <- function(xmat, margin, name = NULL) {
+aftgee.prepX <- function(xmat, margin, name = NULL) {
   newXmat <- NULL
+  xmat <- as.matrix(xmat)
   p <- ncol(xmat)
   if (length(unique(margin)) == 1) {
       colnames(xmat) <- name

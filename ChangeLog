@@ -1,3 +1,11 @@
+2012-09-19  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Names changed for variance, rank and initial.
+	* Fixed estimating equations for multivariate.
+	* Fixed summary display.
+
+2012-08-12  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Names changed for variance, rank and initial.
+
 2012-07-12  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Added Prentice-Wilcoxon weight
 	* Sandwich variance estimator for multivariate
