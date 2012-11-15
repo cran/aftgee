@@ -6,19 +6,15 @@
   The smoothed gehan weight is used for the initial value. As proved in Johnson and Strawderman (2009), the smoooth gehan estimate is consistent.
 }
 \usage{
-smoothrr(formula, data, subset, id,
-         Sigma = NULL,
-         weight = NULL,
-         binit = NULL,
-         nres = 100, p0 = 1, p1 = 1,
-         contrasts = NULL,
-         variance = "ISMB",
-	 rankweight = "gehan",
+smoothrr(formula, data, subset, contrasts = NULL, id,
+         weights = NULL,
+	 rankweights = "gehan", binit = "lm", sigmainit = NULL,
+         variance = "ISMB", B = 100, strataid = NULL,
          control = aftgee.control())
 }
 \arguments{
-  \item{formula}{ Aa formula expression, of the form \code{respone ~ predictors}. 
-    Response can be in class of survival data. 
+  \item{formula}{ Aa formula expression, of the form \code{respone ~ predictors}.
+    Response can be in class of survival data.
     See thye documentation of lm, coxph and formula for details.
   }
   \item{id}{ A vector which identifies the clusters.
@@ -31,11 +27,14 @@ smoothrr(formula, data, subset, id,
   }
   \item{contrasts}{ an optional list.
   }
-  \item{binit}{ A vector of initial estimator; default at linear model.
-  } 
-  \item{Sigma}{ The initial covariance matrix; default at identity matrix.
+  \item{strataid}{ A vector which identifies the strata. This can also
+    be used to distinct case-cohort sampling and stratified sampling.
   }
-  \item{weight}{ A weight vector for covariates; default at 1.
+  \item{binit}{ A vector of initial estimator; default at simple linear regression.
+  }
+  \item{sigmainit}{ The initial covariance matrix; default at identity matrix.
+  }
+  \item{weights}{ A weight vector for covariates; default at 1.
   }
   \item{variance}{ A character string specifying the covariance estimating method.
     The following are permitted:
@@ -48,12 +47,8 @@ smoothrr(formula, data, subset, id,
     \code{'ISMB'}: Johnson and Strwderman's sandwish variance estimates with empirical Si,
     \code{'js'}: Johnson and Strwderman's iterating approach.
   }
-  \item{rankweight}{ A character string specifying between "gehan" and "logrank" weight.}
-  \item{nres}{Resampling size. When M = 0, only the beta estimate will be displayed.
-  }
-  \item{p0}{Case-cohort size ratio.
-  }
-  \item{p1}{Case-cohort size ratio.
+  \item{rankweights}{ A character string specifying between "gehan" and "logrank" weight.}
+  \item{B}{Resampling size. When M = 0, only the beta estimate will be displayed.
   }
   \item{control}{Controls maxiter, abstol and restol.
   }
@@ -78,15 +73,15 @@ smoothrr(formula, data, subset, id,
 \references{
   Chiou, S. H. and Kang, S. and Yan, J. (2012)
   Fast Accelerated Failure Time Modeling for Case-Cohort Data.
-  
+
   Zeng, D. and Lin, D. Y. (2008)
   Efficient Resampling Methods for Nonsmooth Estimating Functions.
   \emph{Biostatistics}, \bold{9}, 355--363
-  
+
   Huang, Y. (2002)
   Calibration Regression of Censored Lifetime Medical Cost.
   \emph{Journal of American Statistical Association}, \bold{97}, 318--327
-  
+
   Johnson, L. M. and Strawderman, R. L. (2009)
   Induced Smoothing for the Semiparametric Accelerated Failure Time Model: Asymptotics and Extensions to Clustered Data.
   \emph{Biometrika}, \bold{96}, 577 -- 590
@@ -98,7 +93,7 @@ smoothrr(formula, data, subset, id,
 #### kidney data
 library(survival)
 data(kidney)
-foo <- smoothrr(Surv(log(time), status) ~ age + sex - 1, id = id, data = kidney, variance = c("MB", "ISMB"), nres = 10)
+foo <- smoothrr(Surv(log(time), status) ~ age + sex - 1, id = id, data = kidney, variance = c("MB", "ISMB"), B = 10)
 foo
 
 #### nwtco data
@@ -117,9 +112,9 @@ nwtco$stage3 = ifelse(nwtco$stage == 3, 1, 0)
 nwtco$stage4 = ifelse(nwtco$stage == 4, 1, 0)
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
-fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, weight = hi, data = sub, nres = 7, variance = c("MB", "ISMB"), subset = stage4 == 1)
+fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, weights = hi, data = sub, B = 7, variance = c("MB", "ISMB"), subset = stage4 == 1)
 summary(fit)
-} 
+}
 
 \keyword{smoothrank}
 

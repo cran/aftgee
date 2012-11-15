@@ -32,7 +32,7 @@ void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize
 	     int *n,
 	     int *p,
 	     int *N,
-	     double *weight,
+	     double *weights,
 	     //output
 	     double *abar) {
   int i, j, k, l, ik_idx = 0, jl_idx, r, s, xdif_idx, abar_idx;
@@ -68,7 +68,7 @@ void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
 	      h = dnorm(z, 0.0, 1.0, 0);
-	      coef = weight[ik_idx] * weight[jl_idx] * h * sqrtn / rikjl;
+	      coef = weights[ik_idx] * weights[jl_idx] * h * sqrtn / rikjl;
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
@@ -106,7 +106,7 @@ void abarlogfun(double *beta, double *Y, double *X, double *delta, int *clsize,
 	     int *n,
 	     int *p,
 	     int *N,
-	     double *weight,
+	     double *weights,
 		/* output */
 	     double *abar) {
   int i, j, k, l, ik_idx = 0, jl_idx, r, s, xdif_idx, xdif_idx2, abar_idx;
@@ -147,7 +147,7 @@ void abarlogfun(double *beta, double *Y, double *X, double *delta, int *clsize,
 	      z = sqrtn * edif / rikjl;
 	      h = dnorm(z, 0.0, 1.0, 0);
 	      H = pnorm(z, 0.0, 1.0, 1, 0);
-	      coef = weight[ik_idx] * weight[jl_idx] * h * sqrtn / rikjl;
+	      coef = weights[ik_idx] * weights[jl_idx] * h * sqrtn / rikjl;
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
@@ -158,10 +158,10 @@ void abarlogfun(double *beta, double *Y, double *X, double *delta, int *clsize,
 		  nu1[xdif_idx] += coef * X[jl_idx + s * *N] * xdif[r];  // s, r
 		  xdif_idx++;
 		}
-		nu2[r] += weight[jl_idx] * H * X[jl_idx + r * *N];
+		nu2[r] += weights[jl_idx] * H * X[jl_idx + r * *N];
 		nu3[r] += coef * xdif[r];
 	      }
-	      de += weight[jl_idx] * H;
+	      de += weights[jl_idx] * H;
 	    } // end if rikjl != 0
 	    jl_idx++;
 	  } // end for l
@@ -198,7 +198,7 @@ void ufun(double *beta,
 	  int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
 	  //output
 	  double *Z,
-	  double *weight,
+	  double *weights,
 	  double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
   double *e = Calloc(*N, double), *xdif = Calloc(*p, double);
@@ -229,7 +229,7 @@ void ufun(double *beta,
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
-		sn[r] += weight[ik_idx] * weight[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r] * H;
+		sn[r] += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r] * H;
 	      } // end for r
 	    }
 	    jl_idx++;
@@ -257,7 +257,7 @@ void unsfun(double *beta,
 	    int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
 	    //output
 	    double *Z,
-	    double *weight,
+	    double *weights,
 	    double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
   double *e = Calloc(*N, double), *xdif = Calloc(*p, double);
@@ -283,7 +283,7 @@ void unsfun(double *beta,
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
-		sn[r] += weight[ik_idx] * weight[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r];
+		sn[r] += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r];
 	      } // end e[ik] - e[jl]
 	    }
 	    jl_idx++;
@@ -311,7 +311,7 @@ void ulogfun(double *beta,
 	     int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
 	     //output
 	     double *Z,
-	     double *weight,
+	     double *weights,
 	     double *pw,
 	     double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
@@ -345,15 +345,15 @@ void ulogfun(double *beta,
 	      z = sqrtn * edif / rikjl;
 	      H = pnorm(z, 0.0, 1.0, 1, 0);
 	      for (r = 0; r < *p; r++) {
-		nu[r] += Z[jl_idx] * weight[jl_idx] * X[jl_idx + r * *N] * H;
+		nu[r] += Z[jl_idx] * weights[jl_idx] * X[jl_idx + r * *N] * H;
 	      }
-	      de += weight[jl_idx] * Z[jl_idx] * H;
+	      de += weights[jl_idx] * Z[jl_idx] * H;
 	    }
 	    jl_idx++;
 	  }
 	}
 	for ( r = 0; r < *p; r ++) {
-	  sn[r] += weight[ik_idx] * pw[ik_idx] * Z[ik_idx] * (X[ik_idx + r * *N] - nu[r] / de);
+	  sn[r] += weights[ik_idx] * pw[ik_idx] * Z[ik_idx] * (X[ik_idx + r * *N] - nu[r] / de);
 	}
       }
       ik_idx++;
@@ -378,7 +378,7 @@ void ulognsfun(double *beta,
 	       int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
 	       //output
 	       double *Z,
-	       double *weight,
+	       double *weights,
 	       double *pw,
 	       double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
@@ -408,15 +408,15 @@ void ulognsfun(double *beta,
 	  for (l = 0; l < clsize[j]; l++) {
 	    if (e[ik_idx] - e[jl_idx] <= 0) {
 	      for ( r = 0; r < *p; r++) {
-		nu[r] += X[jl_idx + r * *N] * weight[jl_idx] * Z[jl_idx];
+		nu[r] += X[jl_idx + r * *N] * weights[jl_idx] * Z[jl_idx];
 	      }
-	      de += Z[jl_idx] * weight[jl_idx];
+	      de += Z[jl_idx] * weights[jl_idx];
 	    }
 	    jl_idx++;
 	  }
 	}  // end jl
 	for (r =  0; r < *p; r++) {
-	  sn[r] += weight[ik_idx] * pw[ik_idx] * Z[ik_idx] * (X[ik_idx + r * *N] - nu[r] / de);
+	  sn[r] += weights[ik_idx] * pw[ik_idx] * Z[ik_idx] * (X[ik_idx + r * *N] - nu[r] / de);
 	}
       }
       ik_idx++;
@@ -437,7 +437,7 @@ void lfun(double *beta,
 	  int *n, // numbers of clusters
 	  int *p, // ncol(X), or dimension
 	  int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
-	  double *weight,
+	  double *weights,
 	  double *Z,
 	  //output
 	  double *ln) {
@@ -469,7 +469,7 @@ void lfun(double *beta,
 	      z = sqrtn * edif / rikjl;
 	      H = pnorm(z, 0.0, 1.0, 1, 0);
 	      h = dnorm(z, 0.0, 1.0, 0);
-	      *ln += weight[ik_idx] * weight[jl_idx] * Z[ik_idx] * Z[jl_idx] * (edif * H + rikjl * h / sqrtn);
+	      *ln += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * (edif * H + rikjl * h / sqrtn);
 	    }
 	    jl_idx++;
 	  }
@@ -491,7 +491,7 @@ void omegafun(double *beta,
 	      int *n,
 	      int *p,
 	      int *N,
-	      double *weight,
+	      double *weights,
 	      //output
 	      double *omega) {
   int i, k, j, l, m, r, s, ik_idx = 0, jl_idx, il_idx, rs_idx, emk = 0, ind = 0, omega_idx;
@@ -516,7 +516,7 @@ void omegafun(double *beta,
 	  if (delta[ik_idx] != 0) {
 	    if (e[ik_idx] - e[jl_idx] < 0) {
 	      for (m = 0; m < *p; m++) {
-		ksi[ik_idx + m * *N] += delta[ik_idx] * (X[ik_idx + m * *N] - X[jl_idx + m * *N]) * weight[jl_idx] / *n;  //changed
+		ksi[ik_idx + m * *N] += delta[ik_idx] * (X[ik_idx + m * *N] - X[jl_idx + m * *N]) * weights[jl_idx] / *n;  //changed
 	      } // end for m
 	    } // end if e - e <0
 	  } // end if delta[ik_idx] != 0
@@ -529,7 +529,7 @@ void omegafun(double *beta,
 		for (s = 0; s < clsize[r]; s++) {
 		  if (e[rs_idx] - e[jl_idx] >= 0) {
 		    for (m = 0; m < *p; m++) {
-		      xdif[m] += weight[rs_idx] * ( X[ik_idx + m * *N] - X[rs_idx + m * *N] );  //changed
+		      xdif[m] += weights[rs_idx] * ( X[ik_idx + m * *N] - X[rs_idx + m * *N] );  //changed
 		    } // end for m
 		    emk++;
 		  } // end if

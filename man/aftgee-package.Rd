@@ -20,8 +20,8 @@
   \tabular{ll}{
     Package: aftgee
     Type: Package
-    Version: 0.3-7
-    Date: 2012-09-26
+    Version: 0.3-9
+    Date: 2012-10-02
     License: GPL(>=3)
     LazyLoad: yes
   }

@@ -1,3 +1,13 @@
+2012-10-17  Sy Han Chiou <steven.chiou@uconn.edu>
+	* More changes in CF
+
+2012-10-13  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Some names changed, arguments' order re-arranged
+	* CF for clustered data
+
+2012-09-26  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Minor fix	
+
 2012-09-19  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Names changed for variance, rank and initial.
 	* Fixed estimating equations for multivariate.
