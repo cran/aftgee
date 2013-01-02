@@ -10,7 +10,7 @@ aftgee <- function(formula, data, subset, id, contrasts = NULL,
   cnames <- names(scall)
   cnames <- cnames[match(mnames, cnames, 0)]
   mcall <- scall[cnames]
-##  if (is.null(mcall$id)) mcall$id <- as.name("id")
+  ##  if (is.null(mcall$id)) mcall$id <- as.name("id")
   mcall[[1]] <- as.name("model.frame")
   m <- eval(mcall, parent.frame())
   y <- model.extract(m, "response")
@@ -202,9 +202,9 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             e <- y - xmat %*% beta
             eres <- lss.eres(e, delta, Z * weights)
             yhat <- delta * y + (1 - delta) * (eres[[1]] + xmat %*% beta)
-            yhatZ <- sqrt(Z * weights) * yhat
-            xmatZ <- sqrt(Z * weights) * xmat
-            geefit <- geese.fit(xmatZ, yhatZ, id, corstr = corstr)
+#            yhatZ <- sqrt(Z * weights) * yhat
+#            xmatZ <- sqrt(Z * weights) * xmat
+            geefit <- geese.fit(xmat, yhat, id, corstr = corstr)
         }
         if (sum(margin == 1) != nobs) {
             e <- y - xmat %*% beta
@@ -229,16 +229,17 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             er1 <- as.vector(er1)
             er1 <- er1[!is.na(er1)]
             yhat <- delta * y + (1 - delta) * (er1 + xmat %*% beta)
-            yhatZ <- sqrt(Z * weights) * yhat
-            xmatZ <- sqrt(Z * weights) * xmat
+#            yhatZ <- sqrt(Z * weights) * yhat
+#            xmatZ <- sqrt(Z * weights) * xmat
             er2 <- as.matrix(eres2[margin])
-            geefit <- geese.fit(xmatZ, yhatZ, id, zsca = er2, scale.fix = TRUE, corstr = corstr)
+            geefit <- geese.fit(xmat, yhat, id, zsca = er2, scale.fix = TRUE, corstr = corstr)
             ## }
         }
         beta <- geefit$beta
         if (control$trace) {
             cat("\n beta:\n")
-            cat(beta)
+            ## cat(beta)
+            print(as.numeric(beta))
         }
         convStep = i
         if (max(abs(beta - betaprev)) <= control$abstol) break

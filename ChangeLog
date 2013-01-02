@@ -1,3 +1,7 @@
+2013-01-02  Sy Han Chiou <steven.chiou@uconn.edu>
+	* report the sample beta used in MB
+	* changes to pass R 2.15.2
+
 2012-10-17  Sy Han Chiou <steven.chiou@uconn.edu>
 	* More changes in CF
 
