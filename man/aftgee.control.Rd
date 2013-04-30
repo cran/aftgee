@@ -7,9 +7,9 @@
   when calling 'aftgee', 'aftgee.fit' or 'aftgee.est'.
 }
 \usage{
-aftgee.control(maxiter = 30,
-               reltol = 0.0001,
-               abstol = 0.0001,
+aftgee.control(maxiter = 50,
+               reltol = 0.01,
+               abstol = 0.01,
                trace = FALSE)
 }
 \arguments{

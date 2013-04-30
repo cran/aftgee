@@ -23,7 +23,7 @@ aftgee <- function(formula, data, subset, id, contrasts = NULL,
   weights <- model.extract(m, weights)
   if (is.null(weights)) weights <- rep(1, N)
   id <- model.extract(m, id)
-  if (is.null(id)) stop("id variable not found.")
+  if (is.null(id)) id <- 1:nrow(y)
   margin <- model.extract(m, margin)
   if (is.null(margin)) margin <- rep(1, N)
   xnames <- colnames(x)[-1]
@@ -135,9 +135,9 @@ aftgee.fit <- function(y, x, id, corstr="independence",
   fit
 }
 
-aftgee.control <- function(maxiter = 30,
-                           reltol = 0.0001,
-                           abstol = 0.0001,
+aftgee.control <- function(maxiter = 50,
+                           reltol = 0.01,
+                           abstol = 0.01,
                            trace = FALSE) {
   list(maxiter = maxiter,
        reltol = reltol,
@@ -204,7 +204,7 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             yhat <- delta * y + (1 - delta) * (eres[[1]] + xmat %*% beta)
 #            yhatZ <- sqrt(Z * weights) * yhat
 #            xmatZ <- sqrt(Z * weights) * xmat
-            geefit <- geese.fit(xmat, yhat, id, corstr = corstr)
+            geefit <- geese.fit(xmat, yhat, id, corstr = corstr, weights = Z * weights)
         }
         if (sum(margin == 1) != nobs) {
             e <- y - xmat %*% beta
@@ -229,10 +229,11 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             er1 <- as.vector(er1)
             er1 <- er1[!is.na(er1)]
             yhat <- delta * y + (1 - delta) * (er1 + xmat %*% beta)
-#            yhatZ <- sqrt(Z * weights) * yhat
-#            xmatZ <- sqrt(Z * weights) * xmat
+            yhatZ <- sqrt(Z * weights) * yhat
+            xmatZ <- sqrt(Z * weights) * xmat
             er2 <- as.matrix(eres2[margin])
-            geefit <- geese.fit(xmat, yhat, id, zsca = er2, scale.fix = TRUE, corstr = corstr)
+            ## geefit <- geese.fit(xmat, yhat, id, zsca = er2, scale.fix = TRUE, corstr = corstr, weights = Z * weights) ##
+            geefit <- geese.fit(xmatZ, yhatZ, id, zsca = er2, scale.fix = TRUE, corstr = corstr)
             ## }
         }
         beta <- geefit$beta

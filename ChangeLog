@@ -1,3 +1,15 @@
+2013-05-15  Sy Han Chiou <steven.chiou@uconn.edu>
+	* Changed contact eamil from steven.chiou@huskymail.uconn.edu to steven.chiou@uconn.edu
+	* Argument ID is no longer required by when cluster sizes are one
+
+2013-04-12  Sy Han Chiou <steven.chiou@uconn.edu>
+	* added extension to GP weight
+	* removed gehan weight in PW 
+
+2013-03-19  Sy Han Chiou <steven.chiou@uconn.edu>
+	* added iterative procedure for general weights in rank-based approach.
+	* added gehan weight in PW
+
 2013-01-02  Sy Han Chiou <steven.chiou@uconn.edu>
 	* report the sample beta used in MB
 	* changes to pass R 2.15.2

@@ -73,7 +73,7 @@ aftgee(formula, data, subset, id,
 
 \value{
   An object of class "aftgee" representing the fit.
-  An object of class "aftgee" is a list containing at elast the
+  An object of class "aftgee" is a list containing at least the
   following components:
   \item{coefficients}{a vector of initial value and a vector of point estimates}
   \item{coef.res}{a vector of point estimates}
@@ -102,7 +102,7 @@ aftgee(formula, data, subset, id,
   with Censored Data. Biometrika, 90, 341--353.
 
   Johnson, L. M. and Strawderman, R. L. (2009) Induced Smoothing for the
-  Semiparametric Accelerated Failure Time Model: Asymptotics and
+  Semiparametric Accelerated Failure Time Model: Asymptotic and
   Extensions to Clustered Data. Biometrika, 96, 577-590.
 }
 

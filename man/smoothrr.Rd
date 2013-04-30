@@ -3,19 +3,19 @@
 \alias{summary.smoothrr}
 \title{Smooth Rank Regression}
 \description{
-  The smoothed gehan weight is used for the initial value. As proved in Johnson and Strawderman (2009), the smoooth gehan estimate is consistent.
+  The smoothed gehan weight is used for the initial value. As proved in Johnson and Strawderman (2009), the smooth gehan estimate is consistent.
 }
 \usage{
 smoothrr(formula, data, subset, contrasts = NULL, id,
          weights = NULL,
 	 rankweights = "gehan", binit = "lm", sigmainit = NULL,
-         variance = "ISMB", B = 100, strataid = NULL,
-         control = aftgee.control())
+         variance = "ISMB", B = 100, gpweight = 1, strataid = NULL,
+         iter = TRUE, control = aftgee.control())
 }
 \arguments{
-  \item{formula}{ Aa formula expression, of the form \code{respone ~ predictors}.
+  \item{formula}{ A formula expression, of the form \code{response ~ predictors}.
     Response can be in class of survival data.
-    See thye documentation of lm, coxph and formula for details.
+    See the documentation of lm, coxph and formula for details.
   }
   \item{id}{ A vector which identifies the clusters.
     The length of 'id' should be the same as the number of observation.
@@ -38,17 +38,21 @@ smoothrr(formula, data, subset, contrasts = NULL, id,
   }
   \item{variance}{ A character string specifying the covariance estimating method.
     The following are permitted:
-    \code{'MB'}: multipiler resmapling,
+    \code{'MB'}: multiplier resampling,
     \code{'ZLCF'}: Zeng and Lin's approach with closed form Si,
     \code{'ZLMB'}: Zeng and Lin's approach with empirical Si,
-    \code{'sHCF'}: Huang's appraoch with closed form Si,
+    \code{'sHCF'}: Huang's approach with closed form Si,
     \code{'sHMB'}: Huang's approach with empirical Si,
-    \code{'ISCF'}: Johnson and Strwderman's sandwish variance estimates with closed form Si,
-    \code{'ISMB'}: Johnson and Strwderman's sandwish variance estimates with empirical Si,
+    \code{'ISCF'}: Johnson and Strwderman's sandwich variance estimates with closed form Si,
+    \code{'ISMB'}: Johnson and Strwderman's sandwich variance estimates with empirical Si,
     \code{'js'}: Johnson and Strwderman's iterating approach.
   }
   \item{rankweights}{ A character string specifying between "gehan" and "logrank" weight.}
   \item{B}{Resampling size. When M = 0, only the beta estimate will be displayed.
+  }
+  \item{gpweight}{ Power for general weight function when rankweights = GP
+  }
+  \item{iter}{ A logical value specifying whether iterative procedure is used for general weights  function
   }
   \item{control}{Controls maxiter, abstol and restol.
   }
@@ -57,7 +61,7 @@ smoothrr(formula, data, subset, contrasts = NULL, id,
 \value{
   \code{smoothrr} returns an object of class "smoothrr" representing
   the fit.\\
-  An object of class "smoothrr" is a list containing at elast the
+  An object of class "smoothrr" is a list containing at least the
   following components:
   \item{beta}{a vector of beta estimates}
   \item{covmat}{a list of covariance estimates}
@@ -66,7 +70,7 @@ smoothrr(formula, data, subset, contrasts = NULL, id,
     indicates successful convergence. Error codes are 1 indicates that
     the iteration limit \code{maxit} has been reached; 2 is failure
     due to stagnation; 3 indicates error in function evaluation; 4 is
-    failure due to exceeding 100 steplength reductions in line-search;
+    failure due to exceeding 100 step length reductions in line-search;
     and 5 indicates lack of improvement in objective function.}
 }
 
@@ -83,7 +87,7 @@ smoothrr(formula, data, subset, contrasts = NULL, id,
   \emph{Journal of American Statistical Association}, \bold{97}, 318--327
 
   Johnson, L. M. and Strawderman, R. L. (2009)
-  Induced Smoothing for the Semiparametric Accelerated Failure Time Model: Asymptotics and Extensions to Clustered Data.
+  Induced Smoothing for the Semiparametric Accelerated Failure Time Model: Asymptotic and Extensions to Clustered Data.
   \emph{Biometrika}, \bold{96}, 577 -- 590
 }
 
@@ -93,7 +97,8 @@ smoothrr(formula, data, subset, contrasts = NULL, id,
 #### kidney data
 library(survival)
 data(kidney)
-foo <- smoothrr(Surv(log(time), status) ~ age + sex - 1, id = id, data = kidney, variance = c("MB", "ISMB"), B = 10)
+foo <- smoothrr(Surv(time, status) ~ age + sex - 1, id = id, 
+                data = kidney, variance = c("MB", "ISMB"), B = 10)
 foo
 
 #### nwtco data
@@ -112,7 +117,9 @@ nwtco$stage3 = ifelse(nwtco$stage == 3, 1, 0)
 nwtco$stage4 = ifelse(nwtco$stage == 4, 1, 0)
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
-fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, weights = hi, data = sub, B = 7, variance = c("MB", "ISMB"), subset = stage4 == 1)
+fit <- smoothrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno, 
+       weights = hi, data = sub, B = 7, variance = c("MB", "ISMB"), 
+       subset = stage4 == 1)
 summary(fit)
 }
 
