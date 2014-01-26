@@ -1,8 +1,7 @@
 aftgee <- function(formula, data, subset, id, contrasts = NULL,
-                   weights = NULL,
-                   margin = NULL,
+                   weights = NULL, margin = NULL,
                    corstr="independence",
-                   binit = "lm", B = 100,
+                   binit = "srrgehan", B = 100,
                    control = aftgee.control()
                    ) {
   scall <- match.call()
@@ -17,9 +16,6 @@ aftgee <- function(formula, data, subset, id, contrasts = NULL,
   N <- NROW(y)
   mterms <- attr(m, "terms")
   x <- model.matrix(mterms, m, contrasts) ## ~x -1
-  if (qr(x)$rank != ncol(x)) {
-      stop("Design matirx does not have full rank; suggest removing intercept.")
-  }
   weights <- model.extract(m, weights)
   if (is.null(weights)) weights <- rep(1, N)
   id <- model.extract(m, id)
@@ -32,6 +28,12 @@ aftgee <- function(formula, data, subset, id, contrasts = NULL,
   out$call <- scall
   out$var.name <- xnames
   ## rownames(out$coefficients) <- rep(c("Intercept", xnames), length(unique(margin)))
+  out$y <- y[,1]
+  out$x <- x
+  out$intercept <- FALSE
+  if (sum(x[,1]) == nrow(x)) {
+      out$intercept <- TRUE
+  }
   colnames(out$coefficients) <- c("binit", "AFTGEE")
   class(out) <- "aftgee"
   out
@@ -81,7 +83,8 @@ aftgee.fit <- function(y, x, id, corstr="independence",
       }
 
       if (binit == "srrgehan") {
-          first <- smoothrr(Surv(exp(Y), delta) ~ X - 1, B = 0, variance = "ISMB", weights = weights, control = control, id = id)
+          first <- aftsrr(Surv(exp(Y), delta) ~ X, B = 0, variance = "ISMB",
+                            weights = weights, control = control, id = id)
           firstBeta <- first$beta
           firstSdMat <- first$covmat$ISMB
           if (is.na(firstSdMat)[1] == FALSE) {
@@ -92,7 +95,7 @@ aftgee.fit <- function(y, x, id, corstr="independence",
           }
           firstconvergence <- first$convergence
           if (include.intercept == 1){
-              firstBeta <- c(mean(Y - X %*% first$beta), firstBeta)
+              firstBeta <- c(mean(Y - X %*% coef(first)), coef(first))
               firstSd <- c(NaN, firstSd)
               firstSdMat <- c(NaN, firstSdMat)
           }
@@ -104,12 +107,16 @@ aftgee.fit <- function(y, x, id, corstr="independence",
       firstconvergence <- 0
   }
   binitValue <- list(beta = firstBeta, sd = firstSd, sdMat = firstSdMat)
-  result <- aftgee.est(Y, x, delta, binitValue$beta, id, corstr, rep(1, length(Y)), margin, weights, control)
+  result <- aftgee.est(Y, x, delta, binitValue$beta, id, corstr,
+                       rep(1, length(Y)), margin, weights, control)
+  sample <- zout <- NULL
   if (B > 0) {
     sample <- matrix(0, nrow = B, ncol = length(result$beta))
     for (i in 1:B){
       Z <- as.vector(rep(rexp(n,1), time = clsize))
-      sample[i,] <- aftgee.est(Y, x, delta, result$beta, id, corstr, Z, margin, weights, control)$beta
+      zout <- cbind(zout, Z)
+      sample[i,] <- aftgee.est(Y, x, delta, result$beta, id, corstr,
+                               Z, margin, weights, control)$beta
     }
     vhat <- var(sample)
   }
@@ -130,18 +137,18 @@ aftgee.fit <- function(y, x, id, corstr="independence",
               binit = binit,
               conv = result$convergence,
               ini.conv = firstconvergence,
+              bhat = sample,
+              zout = zout, 
               conv.step = result$convStep)
   class(fit) <- "aftgee.fit"
   fit
 }
 
 aftgee.control <- function(maxiter = 50,
-                           reltol = 0.01,
-                           abstol = 0.01,
+                           reltol = 0.001,
                            trace = FALSE) {
   list(maxiter = maxiter,
        reltol = reltol,
-       abstol = abstol,
        trace = trace)
 }
 
@@ -202,9 +209,9 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             e <- y - xmat %*% beta
             eres <- lss.eres(e, delta, Z * weights)
             yhat <- delta * y + (1 - delta) * (eres[[1]] + xmat %*% beta)
-#            yhatZ <- sqrt(Z * weights) * yhat
-#            xmatZ <- sqrt(Z * weights) * xmat
-            geefit <- geese.fit(xmat, yhat, id, corstr = corstr, weights = Z * weights)
+            yhatZ <- sqrt(Z) * yhat
+            xmatZ <- sqrt(Z) * xmat
+            geefit <- geese.fit(xmatZ, yhatZ, id, corstr = corstr, weights =  weights)
         }
         if (sum(margin == 1) != nobs) {
             e <- y - xmat %*% beta
@@ -243,7 +250,6 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
             print(as.numeric(beta))
         }
         convStep = i
-        if (max(abs(beta - betaprev)) <= control$abstol) break
         if (max(abs(beta - betaprev)/abs(beta)) <= control$reltol) break
     } ## end i for 1:maxiter
     alpha <- geefit$alpha
@@ -258,7 +264,6 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
                 convergence = convergence, convStep = convStep)
     return(out)
 }
-
 
 lss.eres <- function(e, delta, z = rep(1, length(e)))
 {

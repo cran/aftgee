@@ -1,22 +1,20 @@
-
 \name{aftgee.control}
 \alias{aftgee.control}
 \title{Auxiliary for Controlling AFTGEE Fitting}
 \description{
-  Auxiliary function as user interface for 'aftgee' fitting. Only used
-  when calling 'aftgee', 'aftgee.fit' or 'aftgee.est'.
+  Auxiliary function as user interface for 'aftgee' and 'aftsrr'
+  fitting. 
 }
 \usage{
 aftgee.control(maxiter = 50,
-               reltol = 0.01,
-               abstol = 0.01,
+               reltol = 0.001,
                trace = FALSE)
 }
 \arguments{
-  \item{maxiter}{max number of iteration}
-  \item{reltol}{relative error tolerance}
-  \item{abstol}{absolute error tolerance}
-  \item{trace}{trace back; true of false}
+  \item{maxiter}{max number of iteration.}
+  \item{reltol}{relative error tolerance.}
+  \item{trace}{binary variable, determine whether to display output for
+    each iteration.}
 }
 \details{
   When 'trace' is true, output for each iteration is printed to the

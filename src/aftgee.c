@@ -28,15 +28,17 @@ double get_rikjl(double *X, double *sigma, int *clsize, int *p, int *N, int *n, 
 }
 
 void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize,
-	     double *sigma,
-	     int *n,
-	     int *p,
-	     int *N,
-	     double *weights,
-	     //output
-	     double *abar) {
+		  double *sigma,
+		  int *n,
+		  int *p,
+		  int *N,
+		  double *weights,
+		  double *gehanWeights,
+		  //output
+		  double *abar) {
   int i, j, k, l, ik_idx = 0, jl_idx, r, s, xdif_idx, abar_idx;
-  double *e = Calloc(*N, double), *xdif = Calloc(*p, double), *nu1 = Calloc(*p, double), *nu2 = Calloc(*p, double), *nu3 = Calloc(*p, double);
+  double *e = Calloc(*N, double), *xdif = Calloc(*p, double),
+    *nu1 = Calloc(*p, double), *nu2 = Calloc(*p, double), *nu3 = Calloc(*p, double);
   double rikjl, edif, H, h, u, z, sqrtn = sqrt(*n), coef, de, coef1;
 
   /* compute the e vector */
@@ -68,7 +70,7 @@ void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
 	      h = dnorm(z, 0.0, 1.0, 0);
-	      coef = weights[ik_idx] * weights[jl_idx] * h * sqrtn / rikjl;
+	      coef = gehanWeights[ik_idx] * weights[ik_idx] * weights[jl_idx] * h * sqrtn / rikjl;
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
@@ -199,6 +201,7 @@ void ufun(double *beta,
 	  //output
 	  double *Z,
 	  double *weights,
+	  double *gehanweights,
 	  double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
   double *e = Calloc(*N, double), *xdif = Calloc(*p, double);
@@ -229,7 +232,7 @@ void ufun(double *beta,
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
-		sn[r] += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r] * H;
+		sn[r] += gehanweights[ik_idx] * weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r] * H;
 	      } // end for r
 	    }
 	    jl_idx++;
@@ -258,6 +261,7 @@ void unsfun(double *beta,
 	    //output
 	    double *Z,
 	    double *weights,
+	    double *gehanweights,
 	    double *sn) {
   int i, j, k, l, ik_idx = 0, jl_idx, m, r;
   double *e = Calloc(*N, double), *xdif = Calloc(*p, double);
@@ -283,7 +287,7 @@ void unsfun(double *beta,
 	      for (r = 0; r < *p; r++) {
 		xdif[r] = 0.0;
 		xdif[r] = X[ik_idx + r * *N] - X[jl_idx + r * *N];
-		sn[r] += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r];
+		sn[r] += gehanweights[ik_idx] * weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * xdif[r];
 	      } // end e[ik] - e[jl]
 	    }
 	    jl_idx++;
@@ -437,7 +441,7 @@ void lfun(double *beta,
 	  int *n, // numbers of clusters
 	  int *p, // ncol(X), or dimension
 	  int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
-	  double *weights,
+	  double *weights, double *gehanweights,
 	  double *Z,
 	  //output
 	  double *ln) {
@@ -469,7 +473,7 @@ void lfun(double *beta,
 	      z = sqrtn * edif / rikjl;
 	      H = pnorm(z, 0.0, 1.0, 1, 0);
 	      h = dnorm(z, 0.0, 1.0, 0);
-	      *ln += weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * (edif * H + rikjl * h / sqrtn);
+	      *ln += gehanweights[ik_idx] * weights[ik_idx] * weights[jl_idx] * Z[ik_idx] * Z[jl_idx] * (edif * H + rikjl * h / sqrtn);
 	    }
 	    jl_idx++;
 	  }
@@ -648,6 +652,51 @@ void abarpwfun(double *beta, double *Y, double *X, double *delta, int *clsize, d
 }
 
 
+void getnsgehan (double *beta, double *Y, double *X, int *clsize,
+	     double *sigma,
+	     int *n,
+	     int *p,
+	     int *N,
+	     double *weights,
+		/* output */
+	     double *de) {
+  int i, j, k, l, ik_idx = 0, jl_idx, r, s, xdif_idx, xdif_idx2, abar_idx;
+  double *e = Calloc(*N, double);
+  double rikjl, edif, H, h, u, z, sqrtn = sqrt(*n);
+
+  /* compute the e vector */
+  for (i = 0; i < *N; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *N + i] * beta[j];
+    }
+    e[i] = Y[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    for (k = 0; k < clsize[i]; k++) {
+	jl_idx = 0;
+	for (j = 0; j < *n; j++) {
+	  for (l = 0; l < clsize[j]; l++) {
+	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    if (rikjl != 0) {
+	      edif = e[jl_idx] - e[ik_idx];
+	      if (edif >= 0) {
+		de[ik_idx] += weights[jl_idx];
+	      }
+	    } // end if rikjl != 0
+	    jl_idx++;
+	  } // end for l
+	} // end for j
+      ik_idx++;
+    } // end for k
+  } // end for i
+  Free(e);
+  /* for (r = 0; r < (*p * *p); r++) { */
+  /*   abar[r] /= (*n * (*n - 1)); */
+  /* } */
+  de;
+}
 
 void getgehan (double *beta, double *Y, double *X, int *clsize,
 	     double *sigma,

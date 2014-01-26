@@ -2,7 +2,7 @@
 \alias{aftgee}
 \alias{summary.aftgee}
 \title{
-  Accelerate Failure Time with Generalize Estimating Equation
+  Accelerated Failure Time with Generalize Estimating Equation
 }
 \description{
   A package that uses Generalized Estimating Equations (GEE) to estimate
@@ -12,13 +12,11 @@
   the simple linear regression and the smooth-hegan weight estimator.
 }
 \usage{
+
 aftgee(formula, data, subset, id,
-       contrasts = NULL,
-       weights = NULL,
-       margin  = NULL,
-       corstr = "independence",
-       binit = "lm",
-       B = 100,
+       contrasts = NULL, weights = NULL,
+       margin = NULL, corstr = "independence",
+       binit = "srrgehan", B = 100,
        control = aftgee.control())
 }
 \arguments{
@@ -47,8 +45,11 @@ aftgee(formula, data, subset, id,
   }
   \item{contrasts}{ an optional list.
   }
-  \item{binit}{ a character string specifying the initial estimator.
-    The following are permitted:
+  \item{binit}{ can be either a vector or a character string specifying
+    the initial estimator.
+    When \code{binit} is a vector, its length should be the same as the
+       number of covariates. 
+    When \code{binit} is a character string, the following are permitted:
     \code{"lm"} for simple linear regression,
     \code{"srrgehan"} for smoothed gehan weight estimator.
   }
@@ -64,8 +65,8 @@ aftgee(formula, data, subset, id,
   \tabular{ll}{
     Package:  aftgee
     Type:  Package
-    Version:  0.2-19
-    Date:  2012-03-12
+    Version:  0.4-1
+    Date:  2014-01-26
     License: GPL (>=3)
     LazyLoad:  yes
   }
@@ -80,7 +81,7 @@ aftgee(formula, data, subset, id,
   \item{var.res}{estimated covariance matrix}
   \item{coef.init}{a vector of initial value}
   \item{var.init.mat}{estimated initial covariance matrix}
-  \item{initial}{a character string specifying the initial estimator.}
+  \item{binit}{a character string specifying the initial estimator.}
   \item{conv}{An integer code indicating type of convergence after GEE
   iteration. 0 indicates successful convergence; 1 indicates that the
   iteration limit \code{maxit} has been reached }
@@ -91,12 +92,13 @@ aftgee(formula, data, subset, id,
 }
 
 \author{
-  Sy Han Chiou, Sangwook Kang, Jun Yan
+  Sy Han Chiou, Sangwook Kang, Jun Yan.
 }
 \references{
   Chiou, S. H. and Kim, H. and Yan, J. (2012) Semiparametric
   Multivariate Accelerated Failure Time Model with Generalized
-  Estimating Equations. University of Connecticut. %% report number?
+  Estimating Equations. Technical Report 13, Department of
+  Statistics, University of Connecticut.
 
   Jin, Z. and Lin, D. Y. and Ying, Z. (2006) On Least-squares Regression
   with Censored Data. Biometrika, 90, 341--353.

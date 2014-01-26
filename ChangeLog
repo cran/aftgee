@@ -1,10 +1,31 @@
-2013-05-15  Sy Han Chiou <steven.chiou@uconn.edu>
+2013-12-09 Sy Han Chiou <schiou@d.umn.edu>
+	* summary with B = 0
+	* print aftsrr
+	* changes in responds to JSS revision
+	
+2013-10-25 Sy Han Chiou <schiou@d.umn.edu>
+	* Rename smoothrr with aftsrr
+	* Code clearned
+	* add method to aftsrr
+
+2013-09-24 Sy Han Chiou <schiou@d.umn.edu>
+	* Added Iterative approach with monotone function
+
+2013-07-16 Sy Han Chiou <schiou@d.umn.edu>
+	* Modified the smoothrr function so that no matter intercept is specified, smoothrr only analyze without intercept
+	* Some Generic functions (coef, vcov, residuals) were added
+
+2013-05-26
+	* Case cohort weight applied to least square approach
+	* General weights with gehan's estimating equation
+
+2013-05-15  Sy Han Chiou <steven.chiwqou@uconn.edu>
 	* Changed contact eamil from steven.chiou@huskymail.uconn.edu to steven.chiou@uconn.edu
 	* Argument ID is no longer required by when cluster sizes are one
 
 2013-04-12  Sy Han Chiou <steven.chiou@uconn.edu>
 	* added extension to GP weight
-	* removed gehan weight in PW 
+	* removed gehan weight in PW
 
 2013-03-19  Sy Han Chiou <steven.chiou@uconn.edu>
 	* added iterative procedure for general weights in rank-based approach.
@@ -22,7 +43,7 @@
 	* CF for clustered data
 
 2012-09-26  Sy Han Chiou <steven.chiou@uconn.edu>
-	* Minor fix	
+	* Minor fix
 
 2012-09-19  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Names changed for variance, rank and initial.
@@ -47,7 +68,7 @@
 
 2012-06-06  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Replace "nfsane" by "BBsolve"
-	* Output whether An is invertible 
+	* Output whether An is invertible
 
 2012-05-19  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Added closed form variance estimation, zlc, hc, isc, for "logrank"
@@ -62,7 +83,7 @@
 
 2012-05-07  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Huang's approach with non smoothed estimating equation does not seem to have a converaged solution, this might due to the scales/order.
-	* SiFun, sfun, etc are modiflied based on our paper. 
+	* SiFun, sfun, etc are modiflied based on our paper.
 
 2012-05-04  Sy Han Chiou <steven.chiou@uconn.edu>
 	* Huang's approach with smoothed estimating equation.
@@ -73,7 +94,5 @@
 	* H and ZL on non-smoothed estimating equation.
 
 2012-04-22  Sy Han Chiou  <steven.chiou@uconn.edu>
-	
 	* Modified aftgee.est so that margin can be at no specific order.
         * Added nwtco example.
-  
