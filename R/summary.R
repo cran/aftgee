@@ -2,7 +2,9 @@ print.aftgee <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
   cat("Coefficients:\n")
-  print(x$coefficients)
+  print(x$coef.res)
+  cat("\n Initial Estimator:\n")
+  print(x$coef.init)
 }
 
 print.aftsrr <- function(x, ...) {
@@ -24,7 +26,10 @@ summary.aftgee <- function(object,...){
   se.gee <- sqrt(diag(z$var.res))
   est.temp.gee <- ifelse(se.gee == "NaN", "NaN", est.gee)
   z.val.gee <- as.numeric(est.temp.gee)/as.numeric(se.gee)
-  TAB <- cbind(Estimate = round(est.gee, 3), StdErr = round(se.gee, 3), z.value = round(z.val.gee, 3), p.value = round(2 * pnorm(-abs(z.val.gee)), 3))
+  TAB <- cbind(Estimate = round(est.gee, 3),
+               StdErr = round(se.gee, 3),
+               z.value = round(z.val.gee, 3),
+               p.value = round(2 * pnorm(-abs(z.val.gee)), 3))
   rownames(TAB) <- names(z$coef.res)
   ## binit part
   est.ini <- z$coef.init
@@ -56,7 +61,10 @@ summary.aftsrr <- function(object,...){
   ##  se.covmat <- list(NULL)
   ##  se.covmat[se.count + 1] <- NULL
   for (i in 1:se.count) {
-      se.srr <- ifelse(z$B == 0, NA, sqrt(diag(z$covmat[[se.name[i]]])))
+      se.srr <- NA
+      if (z$B != 0) {
+          se.srr <- sqrt(diag(z$covmat[[se.name[i]]]))
+      }
       z.val.srr <- as.numeric(est.srr)/as.numeric(se.srr)
       temp.srr <- cbind(Estimate = round(est.srr, 3), StdErr = round(se.srr, 3), z.value = round(z.val.srr, 3), p.value = round(2 * pnorm(-abs(z.val.srr)), 3))
       rownames(temp.srr) <- z$vari.name
@@ -133,11 +141,6 @@ residuals.aftsrr <- function(object, ...){
     stop("Most be aftsrr class")
   }
   ans <- z["call"]
-  if (z$intercept == TRUE) {
-      z$beta <- z$beta[-1]
-      z$vari.name <- z$vari.name[-1]
-      z$x <- z$x[,-1]
-  }
   out <- log(z$y[,1]) - z$x %*% z$beta
   out
 }
@@ -152,13 +155,6 @@ vcov.aftsrr <- function(object, ...){
   var.meth <- z$var.meth[z$var.meth %in% c("MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
   se.count <- length(var.meth)
   se.name <- match(var.meth, names(z$covmat))
-#  if (z$intercept == TRUE) {
-#      for (i in se.name){
-#          z$covmat[[i]] <- z$covmat[[i]][-1, -1]
-#      }
-#      z$vari.name <- z$vari.name[-1]
-#      z$beta <- z$beta[-1]
-#  }
   p <- length(z$beta)
   TAB.srr <- NULL
   out <- list(NULL)
@@ -209,12 +205,6 @@ residuals.aftgee <- function(object, ...){
 predict.aftsrr <- function(object, newdata = NULL, se.fit = FALSE, type = "lp", ...){
   z <- object
   out <- NULL
-  if (z$intercept == TRUE) {
-      z$beta <- z$beta[-1]
-      z$vari.name <- z$vari.name[-1]
-      z$x <- z$x[,-1]
-  }
-
   if (is.null(newdata)) {
       out$fit <- as.numeric(z$x %*% z$beta)
       if (type == "response") {
@@ -233,11 +223,6 @@ predict.aftsrr <- function(object, newdata = NULL, se.fit = FALSE, type = "lp", 
       var.meth <- z$var.meth[z$var.meth %in% c("MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
       se.count <- length(var.meth)
       se.name <- match(var.meth, names(z$covmat))
-      if (z$intercept == TRUE) {
-              for (i in se.name){
-                  z$covmat[[i]] <- z$covmat[[i]][-1, -1]
-              }
-          }
       p <- length(z$beta)
       TAB.srr <- NULL
       var <- list(NULL)

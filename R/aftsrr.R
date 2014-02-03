@@ -696,20 +696,18 @@ aftsrr <- function(formula, data, id, subset, contrasts = NULL,
     }
     N <- NROW(y)
     mterms <- attr(m, "terms")
-    x <- model.matrix(mterms, m, contrasts) ## this x has intercept
+    x <- model.matrix(mterms, m, contrasts) 
     weights <- model.extract(m, weights)
     strata <- model.extract(m, strata)
     if (is.null(weights)) weights <- rep(1, N)
     stratify <- TRUE
     if (is.null(strata)) stratify <- FALSE
     xnames <- colnames(x)
-
-    if (sum(x[,1]) == nrow(x)) {
+    if ("(Intercept)" %in% colnames(x)) {
         x <- x[,-1]
         xnames <- xnames[-1]
     }
     if(is.null(SigmaInit)) {SigmaInit = diag(ncol(x))}
-  
     ## check rankWeights 
     if (is.numeric(rankWeights)) {
         if (length(rankWeights) != nrow(y)) {
@@ -730,11 +728,6 @@ aftsrr <- function(formula, data, id, subset, contrasts = NULL,
     out$call <- scall
     out$vari.name <- xnames
     names(out$beta) <- xnames
-    ## out$intercept <- FALSE
-    if (sum(x[,1]) == nrow(x)) {
-        out$intercept <- TRUE
-        x <- x[,-1]
-    }
     out$y <- y
     out$x <- as.matrix(x)
     out$B <- B
@@ -745,7 +738,8 @@ aftsrr <- function(formula, data, id, subset, contrasts = NULL,
 
 aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
                        variance = "ISMB", B = 100, rankWeights = "gehan", method = "sm",
-                       SigmaInit, pw = NULL, stratify = TRUE, control = aftgee.control()) {
+                       SigmaInit = diag(ncol(X)), pw = NULL, stratify = TRUE,
+                       control = aftgee.control()) {
     p <- ncol(X)
     binit = "lm"
     if (is.numeric(binit)) {
@@ -798,9 +792,11 @@ aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
         }
     }
     if (sum(variance %in% c("ISMB", "ISCF", "ZLMB", "ZLCF", "sZLMB", "sZLCF", "sHMB", "sHCF")) > 0) {
-        gw <- get_gw(Y = Y, X = X, beta = btemp2, N = nrow(X), delta = delta,
-                     clsize = clsize, sigma = SigmaInit, weights = weights,
-                     rankWeights = rankWeights)
+        if (B > 0) {
+            gw <- get_gw(Y = Y, X = X, beta = btemp2, N = nrow(X), delta = delta,
+                         clsize = clsize, sigma = SigmaInit, weights = weights,
+                         rankWeights = rankWeights)
+        }
     }
     
     if (sum(variance %in% "ZLCF") > 0) {

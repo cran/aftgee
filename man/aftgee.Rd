@@ -46,7 +46,7 @@ aftgee(formula, data, subset, id,
   \item{contrasts}{ an optional list.
   }
   \item{binit}{ can be either a vector or a character string specifying
-    the initial estimator.
+    the initial slope estimator.
     When \code{binit} is a vector, its length should be the same as the
        number of covariates. 
     When \code{binit} is a character string, the following are permitted:
