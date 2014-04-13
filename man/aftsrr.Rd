@@ -9,67 +9,71 @@
   additional sampling weights are also incorporated.
 }
 \usage{
-aftsrr(formula, data, id, subset, contrasts = NULL,
+aftsrr(formula, data, subset, id = NULL, contrasts = NULL,
        strata = NULL, weights = NULL, rankWeights = "gehan",
        method = "sm", variance = "ISMB", B = 100, SigmaInit = NULL, 
        control = aftgee.control())
        }
 
 \arguments{
-  \item{formula}{ A formula expression, of the form \code{response ~ predictors}.
-    Response can be in class of survival data.
-    See the documentation of lm, coxph and formula for details.
+  \item{formula}{ a formula expression, of the form \code{response ~ predictors}.
+    The \code{response} is a \code{Surv} object object with right censoring.
+    See the documentation of \code{lm}, \code{coxph} and \code{formula} for details.
   }
-  \item{data}{ An optional data frame in which to interpret the variables
-    occurring in the \code{formula}, along with the \code{id}.
+  \item{data}{ an optional data frame in which to interpret the variables
+    occurring in the \code{formula}.
   }
-  \item{id}{ A vector which identifies the clusters.
-    The length of 'id' should be the same as the number of observation.
+  \item{id}{ an optional vector used to identify the clusters.
+    If missing, then each individual row of \code{data} is presumed to
+    represent a distinct subject.
+    The length of \code{id} should be the same as the number of observation.
   }
-  \item{subset}{ An optional vector specifying a subset of observations to be used in the fitting process.
+  \item{subset}{ an optional vector specifying a subset of observations
+    to be used in the fitting process.
   }
   \item{contrasts}{ an optional list.
   }
-  \item{strata}{ A vector which identifies the strata. This can also
-    be used to distinct case-cohort sampling and stratified sampling.
+  \item{strata}{ a vector which identifies strata.
+    This can also be used to distinct case-cohort sampling and stratified sampling.
   }
-  \item{weights}{ A weight vector for covariates; default at 1.
+  \item{weights}{ an optional vector of observation weights.
   }
-  \item{rankWeights}{ A character string specifying the type of general
+  \item{rankWeights}{ a character string specifying the type of general
     weights.
     The following are permitted:
-    \code{'logrank'}: logrank weight,
-    \code{'gehan'}: Gehan's weight,
-    \code{'PW'}: Prentice-Wilcoxon weight,
-    \code{'GP'}: GP class weight.
+    \code{logrank}: logrank weight,
+    \code{gehan}: Gehan's weight,
+    \code{PW}: Prentice-Wilcoxon weight,
+    \code{GP}: GP class weight.
   }
-  \item{method}{ A character string specifying the methods to estimate
+  \item{method}{ a character string specifying the methods to estimate
     the regression parameter.
     The following are permitted:
-    \code{'nonsm'}: Regression parameters are estimated by directly solving the nonsmooth
+    \code{nonsm}: Regression parameters are estimated by directly solving the nonsmooth
 estimating equations.
-    \code{'sm'}: Regression parameters are estimated by directly solving the smoothed
+    \code{sm}: Regression parameters are estimated by directly solving the smoothed
 estimating equations.
-    \code{'monosm'}:Regression parameters are estimated by iterating the
+    \code{monosm}:Regression parameters are estimated by iterating the
   monotonic smoothed estimating equations. This is typical when
   \code{rankWeights = "PW"} and \code{rankWeights = "GP"}.
   }  
-  \item{variance}{ A character string specifying the covariance estimating method.
+  \item{variance}{ a character string specifying the covariance estimating method.
     The following are permitted:
-    \code{'MB'}: multiplier resampling,
-    \code{'ZLCF'}: Zeng and Lin's approach with closed form Si,
-    \code{'ZLMB'}: Zeng and Lin's approach with empirical Si,
-    \code{'sHCF'}: Huang's approach with closed form Si,
-    \code{'sHMB'}: Huang's approach with empirical Si,
-    \code{'ISCF'}: Johnson and Strwderman's sandwich variance estimates with closed form Si,
-    \code{'ISMB'}: Johnson and Strwderman's sandwich variance estimates with empirical Si,
-    \code{'js'}: Johnson and Strwderman's iterating approach.
+    \code{MB}: multiplier resampling,
+    \code{ZLCF}: Zeng and Lin's approach with closed form Si,
+    \code{ZLMB}: Zeng and Lin's approach with empirical Si,
+    \code{sHCF}: Huang's approach with closed form Si,
+    \code{sHMB}: Huang's approach with empirical Si,
+    \code{ISCF}: Johnson and Strwderman's sandwich variance estimates with closed form Si,
+    \code{ISMB}: Johnson and Strwderman's sandwich variance estimates with empirical Si,
+    \code{js}: Johnson and Strwderman's iterating approach.
   }
-  \item{B}{Resampling size. When M = 0, only the beta estimate will be displayed.
+  \item{B}{ a numeric value specifies the resampling number.
+    When B = 0, only the beta estimate will be displayed.
   }
-  \item{SigmaInit}{ The initial covariance matrix; default at identity matrix.
+  \item{SigmaInit}{ the initial covariance matrix; default at identity matrix.
   }
-  \item{control}{ Controls maxiter and tolerance.
+  \item{control}{ controls maxiter and tolerance.
   }
 }
 
@@ -92,8 +96,9 @@ estimating equations.
 }
 
 \references{
-  Chiou, S. H. and Kang, S. and Yan, J. (2012)
+  Chiou, S. H. and Kang, S. and Yan, J. (2013)
   Fast Accelerated Failure Time Modeling for Case-Cohort Data.
+  \emph{Statistics and Computing}, forthcoming.
 
   Zeng, D. and Lin, D. Y. (2008)
   Efficient Resampling Methods for Nonsmooth Estimating Functions.
@@ -108,14 +113,16 @@ estimating equations.
   \emph{Biometrika}, \bold{96}, 577 -- 590
 }
 
-\author{Steven Chiou \email{steven.chiou@uconn.edu}}
+\author{
+  Sy Han Chiou, Sangwook Kang, Jun Yan.
+}
 \examples{
 
 #### kidney data
 library(survival)
 data(kidney)
 foo <- aftsrr(Surv(time, status) ~ age + sex - 1, id = id,
-                data = kidney, variance = c("MB", "ISMB"), B = 10)
+                data = kidney, variance = c("ISMB", "ZLMB"), B = 10)
 foo
 
 #### nwtco data
@@ -127,16 +134,12 @@ nwtco$subcohort[subinx] <- 1
 pn <- table(nwtco$subcohort)[[2]] / sum(table(nwtco$subcohort))
 nwtco$hi <- nwtco$rel + ( 1 - nwtco$rel) * nwtco$subcohort / pn
 nwtco$age12 <- nwtco$age / 12
-nwtco$edrel = nwtco$edrel / 12
-nwtco$study = nwtco$study - 3
-nwtco$stage2 = ifelse(nwtco$stage == 2, 1, 0)
-nwtco$stage3 = ifelse(nwtco$stage == 3, 1, 0)
-nwtco$stage4 = ifelse(nwtco$stage == 4, 1, 0)
+nwtco$study <- nwtco$study - 3
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
-fit <- aftsrr(Surv(edrel, rel) ~ histol + age12 + study - 1, id = seqno,
-       weights = hi, data = sub, B = 7, variance = c("MB", "ISMB"),
-       subset = stage4 == 1)
+fit <- aftsrr(Surv(edrel, rel) ~ histol + age12 + study, id = seqno,
+       weights = hi, data = sub, B = 10, variance = c("ISMB", "ZLMB"),
+       subset = stage == 4)
 summary(fit)
 }
 

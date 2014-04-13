@@ -15,7 +15,7 @@ Ln <- function(beta, other) {
   .C("lfun", as.double(beta), as.double(Y), as.double(X), as.double(delta),
      as.integer(clsize), as.double(sigma), as.integer(n), as.integer(p),
      as.integer(N), as.double(weights), as.double(gw),
-     as.double(Z), out=as.double(ln), PACKAGE = "aftgee") $out
+     as.double(Z), out = as.double(ln), PACKAGE = "aftgee")$out
 }
 
 
@@ -69,7 +69,7 @@ omegaFun <- function(beta, Y, X, delta, clsize, weights) {
             out = as.double(omega), PACKAGE = "aftgee")$out, nrow = p)
 }
 
-get_rankname <- function(rankWeights, method) {
+getRankName <- function(rankWeights, method) {
     rktemp <- rankWeights
     if (method == "nonsm") {
         if (rktemp == "logrank") {rankWeights <- "nslogrank"}
@@ -95,10 +95,8 @@ get_rankname <- function(rankWeights, method) {
     out <- list(rankWeights = rankWeights)
 }
 
-get_suv <- function(Y, X, beta, N, delta, weights) {
+getSuv <- function(Y, X, beta, N, delta, weights) {
     en <- Y - X %*% beta
-    ik <- rep(1:N, each=N)
-    jl <- rep(1:N, N)
     Shat <- fhat <- NULL
     dummy <- 1:N
     ord <- order(en)
@@ -122,7 +120,26 @@ get_suv <- function(Y, X, beta, N, delta, weights) {
     list(Shat = Shat, Shatlast = Shatlast)
 }
 
-get_gehan <- function(Y, X, beta, N, delta, clsize, sigma, weights, smooth = FALSE) {
+getWi <- function(Y, X, beta, N, delta, weights) {
+    en <- Y - X %*% beta
+    shat <- fhat <- NULL
+    dummy <- 1:N
+    ord <- order(en)
+    ei <- en[ord]
+    weightsi <- weights[ord]
+    deltai <- delta[ord]
+    repeats <- table(ei)
+    Shati <- survfit(Surv(ei, deltai) ~ 1, weights = weightsi)$surv
+    Shati <- rep(Shati, repeats)
+    ## shat <- getSuv(Y, X, beta, N, delta, weights)$Shat
+    what <- NULL
+    whati <- cumsum(Shati)
+    shat[dummy[ord]] <- Shati
+    what[dummy[ord]] <- whati
+    list(what = what, shat = shat)
+}
+   
+getGehan <- function(Y, X, beta, N, delta, clsize, sigma, weights, smooth = FALSE) {
     p <- ncol(X)
     N <- nrow(X)
     n <- length(clsize)
@@ -135,31 +152,31 @@ get_gehan <- function(Y, X, beta, N, delta, clsize, sigma, weights, smooth = FAL
     if (smooth == FALSE) {
         out <- matrix(.C("getnsgehan", as.double(beta), as.double(Y), as.double(X), as.integer(clsize),
                          as.double(sigma), as.integer(n), as.integer(p), as.integer(N), as.double(weights),
-                         out = as.double(a), PACKAGE = "aftgee")$out, ncol = 1) + 1
+                         out = as.double(a), PACKAGE = "aftgee")$out, ncol = 1) ##+ 1
     }
 
     out
 }
 
-get_pw <- function(Y, X, beta, N, delta, weights, rankWeights) {
+getPw <- function(Y, X, beta, N, delta, weights, rankWeights) {
     if (rankWeights == "logrank") {
         pw <- rep(1, nrow(X))
     }
     if (rankWeights == "PW") {
-        pw <- get_suv(Y, X, beta, N, delta, weights)$Shat 
+        pw <- getSuv(Y, X, beta, N, delta, weights)$Shat 
     }
     if (rankWeights == "GP") {
-        pw <- get_suv(Y, X, beta, N, delta, weights)$Shat ^ (1 / ncol(X))
+        pw <- getSuv(Y, X, beta, N, delta, weights)$Shat ^ (1 / ncol(X))
     }
     if (rankWeights == "eGP") {
-        pw <- get_suv(Y, X, beta, N, delta, weights)
+        pw <- getSuv(Y, X, beta, N, delta, weights)
         pw <- ((pw$Shat - pw$Shatlast) / (1 - pw$Shatlast))^ (1 / ncol(X))
     }
     pw
 }
 
-get_gw <- function(Y, X, beta, N, delta, clsize, sigma, weights, rankWeights, pw = NULL) {
-    de <- get_gehan(Y, X, beta, N, delta, clsize, sigma, weights)
+getGw <- function(Y, X, beta, N, delta, clsize, sigma, weights, rankWeights, pw = NULL) {
+    de <- getGehan(Y, X, beta, N, delta, clsize, sigma, weights)
     if (is.numeric(pw)) {
         gw <- pw / de
     }
@@ -171,18 +188,18 @@ get_gw <- function(Y, X, beta, N, delta, clsize, sigma, weights, rankWeights, pw
             gw <- 1 / de
         }
         if (rankWeights == "PW") {
-            ne <- get_suv(Y, X, beta, N, delta, weights)$Shat
+            ne <- getSuv(Y, X, beta, N, delta, weights)$Shat
             gw <- ne / de
         }
         if (rankWeights == "GP") {
-            ne <- get_suv(Y, X, beta, N, delta, weights)$Shat ^ (1 / ncol(X))
+            ne <- getSuv(Y, X, beta, N, delta, weights)$Shat ^ (1 / ncol(X))
             gw <- ne / de
         }
     }
     gw
 }
 
-get_smooth_suv <- function(Y, X, beta, N, delta, weights) {
+getSmoothSuv <- function(Y, X, beta, N, delta, weights) {
     en <- Y - X %*% beta
     ik <- rep(1:N, each=N)
     jl <- rep(1:N, N)
@@ -239,8 +256,8 @@ uilogFun <- function(beta, Y, X, delta, clsize, sigma, n, Z,
                   as.double(pw), out = as.double(sn), PACKAGE = "aftgee")$out
     }
     if (rkmethod == "nonsm") {
-        pw <- get_pw(Y = Y, X = X, beta = beta, N = N, delta = delta,
-                     weights = weights, rankWeights)
+        pw <- getPw(Y = Y, X = X, beta = beta, N = N, delta = delta,
+                    weights = weights, rankWeights)
         ans <- .C("ulognsfun", as.double(beta), as.double(Y), as.double(X),
                   as.double(delta), as.integer(clsize),
                   as.double(sigma), as.integer(n), as.integer(p),
@@ -250,8 +267,11 @@ uilogFun <- function(beta, Y, X, delta, clsize, sigma, n, Z,
     ans - constant
 }
 
-solveGehan <- function(beta, Y, X, delta, clsize, sigma, weights, Z, gw = rep(1, nrow(X))) {
-    tbeta <- system.time(temp <- nlm(Ln, p = beta, other = list(Y, X, delta, clsize, sigma, weights, Z, gw), fscale = 0.01))
+solveGehan <- function(beta, Y, X, delta, clsize, sigma, weights,
+                       Z, gw = rep(1, nrow(X))) {
+    tbeta <- system.time(temp <- nlm(Ln, p = beta,
+                                     other = list(Y, X, delta, clsize, sigma, weights, Z, gw),
+                                     fscale = 0.01))
     conv <- ifelse(temp$code == 1, 0, 1)
     out <- list(beta = temp$estimate, tbeta = tbeta, conv = conv)
 }
@@ -261,7 +281,7 @@ solvePW <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
     p <- ncol(X)
     N <- sum(clsize)
     if (method == "sm") {
-        pw <- get_pw(Y = Y, X = X, beta = beta, N = N, delta = delta,
+        pw <- getPw(Y = Y, X = X, beta = beta, N = N, delta = delta,
                      weights = weights, rankWeights)
         btime <- system.time(temp <- BBsolve(beta, uilogFun, Y = Y, X = X, delta = delta,
                                              clsize = clsize, sigma = sigma, n = N, Z = Z,
@@ -271,7 +291,7 @@ solvePW <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
         out <- list(beta = temp$par, btime = btime[3])
     }
     if (method == "monosm") {
-        gw <- get_gw(Y = Y, X = X, beta = beta, N = N, delta = delta,
+        gw <- getGw(Y = Y, X = X, beta = beta, N = N, delta = delta,
                      clsize = clsize, sigma = sigma, weights = weights,
                      rankWeights = rankWeights)
         btime <- system.time(temp <- solveGehan(beta, Y, X, delta, clsize, sigma, weights, Z, gw))
@@ -280,7 +300,6 @@ solvePW <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
     out$gw <- ifelse(method == "monosm", gw, rep(1, nrow(X)))
     out   
 }
-
 
 viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                   mb = TRUE, zbeta = FALSE, smooth = TRUE,
@@ -328,19 +347,19 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                                 pw = rep(1, sum(clsize)),
                                 rankWeights = "logrank", rkmethod = "sm") # / n
         }
-        if (rankWeights %in% c("mPW", "mGP", "mlogrank")) {
+        if (rankWeights %in% c("mPW", "mGP", "mlogrank", "userdefined")) {
             if (rankWeights == "mGP") {
-                gw <- get_gw(Y = Y, X = X, beta = beta, N = n, delta = delta,
+                gw <- getGw(Y = Y, X = X, beta = beta, N = n, delta = delta,
                              clsize = clsize, sigma = sigma, weights = weights,
                              rankWeights = "GP")
             }
             if (rankWeights == "mlogrank") {
-                gw <- get_gw(Y = Y, X = X, beta = beta, N = n, delta = delta,
+                gw <- getGw(Y = Y, X = X, beta = beta, N = n, delta = delta,
                              clsize = clsize, sigma = sigma, weights = weights,
                              rankWeights = "logrank")
             }
             if (rankWeights == "mPW") {
-                gw <- get_gw(Y = Y, X = X, beta = beta, N = n, delta = delta,
+                gw <- getGw(Y = Y, X = X, beta = beta, N = n, delta = delta,
                              clsize = clsize, sigma = sigma, weights = weights,
                              rankWeights = "PW")
             }
@@ -353,7 +372,7 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                                     out = as.double(sn), PACKAGE = "aftgee")$out) # / n
         }
         if (rankWeights %in% c("PW", "GP", "eGP")) {
-            pw <- get_pw(Y = Y, X = X, beta = newbeta, N = nrow(X),
+            pw <- getPw(Y = Y, X = X, beta = newbeta, N = nrow(X),
                          delta = delta, weights = weights, rankWeights)
             UnV[,i] <- uilogFun(beta = newbeta, Y = Y, X = X, delta = delta,
                                 clsize = clsize, sigma = sigma,
@@ -394,7 +413,7 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
 }
 
 
-get_si <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)),
+getSi <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)),
                    rankWeights = "gehan") {
     p <- ncol(X)
     clsize <- unlist(lapply(split(id, id), length))
@@ -448,7 +467,7 @@ get_si <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)),
     s
 }
 
-get_vi <- function(s, id, delta, weights, n) {
+getVi <- function(s, id, delta, weights, n) {
     clweights <- as.numeric(unlist(lapply(split(weights, id), unique)))
     s1 <- rowsum(s, group = id)
     si1 <- lapply(split(s1, 1:nrow(s1)), function(x) x %o% x)
@@ -463,7 +482,8 @@ get_vi <- function(s, id, delta, weights, n) {
     if (length(unique(weights)) > 1) {
         cweights <- unique(weights)
         cweights <- cweights[cweights != 1 & cweights != 0]
-        vi <- (cweights - 1)* (v1 - v2)
+        ## vi <- (cweights - 1)* (v1 - v2)
+        vi <- v1 - v2
     }
     list(vi = vi, v1 = v1, v2 = v2)
 }
@@ -478,17 +498,17 @@ viClo <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
     clid <- unlist(lapply(clsize, function(x) 1:x))
     stra <- match(weights, unique(weights))
     dim <- unique(clsize)
-    s <- get_si(beta = beta, Y = Y, delta = delta, X = X, id = id,
+    s <- getSi(beta = beta, Y = Y, delta = delta, X = X, id = id,
                 weights = weights, rankWeights = rankWeights)
-    if (stratify == TRUE) {
-        v1 <- get_vi(s, id, delta, weights, n)$v1
+    if (stratify) {
+        v1 <- getVi(s, id, delta, weights, n)$v1
         vi <- v1
         v2 <- matrix(0, ncol = p, nrow = p)
         if (length(unique(stra)) > 1) {
             for (i in 1:length(unique(stra))) {
                 ns <- sum(unlist(lapply(split(weights[stra == i], id[stra == i]), unique)))
                 ## weights at cluster level
-                v2i <- get_vi(s = s[stra == i, ], id = id[stra == i], delta = delta[stra == i],
+                v2i <- getVi(s = s[stra == i, ], id = id[stra == i], delta = delta[stra == i],
                               weights = weights[stra == i],
                               n = ns
                               )$vi
@@ -498,11 +518,11 @@ viClo <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
             vi <- v1 + v2
         }
     }
-    if (stratify != TRUE) {
-        v1 <- get_vi(s, id, delta, weights, n)$v1 # / sum(clsize)
+    if (!(stratify)) {
+        v1 <- getVi(s, id, delta, weights, n)$v1 # / sum(clsize)
         vi <- v1
         if (length(unique(stra)) > 1) {
-            v2 <- get_vi(s, id, delta, weights * (1 - delta), n)$vi # / sum(clsize)
+            v2 <- getVi(s, id, delta, weights * (1 - delta), n)$vi # / sum(clsize)
             vi <- v1 + v2
         }
     }
@@ -568,9 +588,8 @@ zlFun <- function(beta, Y, X, delta, id, weights = rep(1, nrow(X)),
                   B = 500, vClose = FALSE, rankWeights = "gehan", method = "sm",
                   gw = gw, stratify = TRUE,
                   sigma = diag(ncol(X))) {
-
     gpweight <- ifelse(rankWeights == "GP", 1/ncol(X), 1)
-    rankWeights <- get_rankname(rankWeights, method)$rankWeights
+    rankWeights <- getRankName(rankWeights, method)$rankWeights
     ## if (sum(variance %in% "ZLMB") > 0) {
     ##     variance <- ifelse(rankWeights %in% c("mGP", "mPW"), "sZLMB", variance)
     ## }
@@ -599,7 +618,7 @@ zlFun <- function(beta, Y, X, delta, id, weights = rep(1, nrow(X)),
     }
     An <- matrix(0, nrow = p, ncol = p)
     for (i in 1:p) {
-        An[i,] <- lm( UnV[i,] ~ matrix(t(zmat), ncol = p) - 1)$coef
+        An[i,] <- lm(UnV[i,] ~ matrix(t(zmat), ncol = p) - 1)$coef
     }
     if (qr(An)$rank != p) {
         covmat <- ginv(An) %*% vi %*% t(ginv(An))
@@ -646,7 +665,7 @@ isFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), sigma, B = 5
         An <- abarlogfun(beta, Y, X, delta, clsize, sigma, weights)
     }
     if (rankWeights %in% c("PW", "GP", "Prentice-Wilcoxon")) {
-        pw <- get_smooth_suv(Y, X, beta, n, delta, weights)
+        pw <- getSmoothSuv(Y, X, beta, n, delta, weights)
         An <- abarpwfun(beta, Y, X, delta, clsize, sigma, weights, pw)
     }
 
@@ -665,23 +684,19 @@ isFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), sigma, B = 5
 }
 
 
-aftsrr <- function(formula, data, id, subset, contrasts = NULL, 
+aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL, 
                    strata = NULL, weights = NULL,
                    rankWeights = "gehan", method = "sm",
                    variance = "ISMB",
                    B = 100, SigmaInit = NULL,
                    control = aftgee.control()) {
-    rank_names <- c("gehan", "logrank", "PW", "GP", "userdefined")
-    rank_method <- c("sm", "nonsm", "monosm")
-    
-    ## check variance input
-    variance_names <- c("MB", "ZLCF", "sZLMB", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB")
-    if (sum(!(variance %in% variance_names)) == 8)
-    { stop("Invaid variance estimates.") }
-    ## check method input
-    if (!(method %in% rank_method)) {
-        stop("Invaid method type")
-    }
+    rankNames <- c("gehan", "logrank", "PW", "GP", "userdefined")
+    rankMethod <- c("sm", "nonsm", "monosm")
+    varianceNames <- c("MB", "ZLCF", "sZLMB", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB")
+    if (sum(variance %in% varianceNames) != length(variance %in% varianceNames))
+         stop("Invalid variance estimates", call. = FALSE) 
+    if (!(method %in% rankMethod)) 
+        stop("Invalid method type", call. = FALSE)
     scall <- match.call()
     mnames <- c("", "formula", "data", "weights", "subset", "na.nation", "id", "strata")
     cnames <- names(scall)
@@ -691,37 +706,44 @@ aftsrr <- function(formula, data, id, subset, contrasts = NULL,
     m <- eval(mcall, parent.frame())
     id <- model.extract(m, id)
     y <- model.extract(m, "response")
-    if (is.null(id)) {
+    if (ncol(y) > 2) 
+        stop("aftsrr only supports Surv object with right censoring", call. = FALSE)
+    if (is.null(id)) 
         id <- 1:nrow(y)
-    }
     N <- NROW(y)
     mterms <- attr(m, "terms")
     x <- model.matrix(mterms, m, contrasts) 
     weights <- model.extract(m, weights)
     strata <- model.extract(m, strata)
-    if (is.null(weights)) weights <- rep(1, N)
+    if (is.null(weights))
+        weights <- rep(1, N)
     stratify <- TRUE
-    if (is.null(strata)) stratify <- FALSE
+    ##    if (is.null(strata))
+    ##        stratify <- FALSE
     xnames <- colnames(x)
     if ("(Intercept)" %in% colnames(x)) {
-        x <- x[,-1]
+        x <- as.matrix(x[,-1])
         xnames <- xnames[-1]
     }
-    if(is.null(SigmaInit)) {SigmaInit = diag(ncol(x))}
+    if(is.null(SigmaInit)) {
+        if (ncol(x) == 1) 
+            SigmaInit <- 1
+        else
+        SigmaInit <- diag(ncol(x))
+    }
     ## check rankWeights 
-    if (is.numeric(rankWeights)) {
-        if (length(rankWeights) != nrow(y)) {
-            stop("rankWeights value length does not match with dimension")
-        }
-        pw <- rankWeights
-    }
     if (!is.numeric(rankWeights)) {
-        if (!(rankWeights %in% rank_names)) {
-            stop("Invaid rankWeights weights.")
-        }
         pw <- NULL
+        if (!(rankWeights %in% rankNames)) 
+            stop("Invalid rankWeights weights", call. = FALSE)
     }
-    out <- aftsrr.fit(Y = log(y[,1]), delta = y[,2], X = as.matrix(x), id = id,
+    if (is.numeric(rankWeights)) {
+        if (length(rankWeights) != nrow(y)) 
+            stop("rankWeights value length does not match with dimension", call. = FALSE)
+        pw <- rankWeights
+        rankWeights = "userdefined"
+    }
+    out <- aftsrr.fit(Y = log(y[,1]), delta = y[,2], X = x, id = id,
                         weights = weights, SigmaInit = SigmaInit,
                         variance = variance, B = B, rankWeights = rankWeights,
                         method = method, pw = pw, stratify = stratify, control = control)
@@ -740,11 +762,14 @@ aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
                        variance = "ISMB", B = 100, rankWeights = "gehan", method = "sm",
                        SigmaInit = diag(ncol(X)), pw = NULL, stratify = TRUE,
                        control = aftgee.control()) {
+    X <- as.matrix(X)
     p <- ncol(X)
     binit = "lm"
     if (is.numeric(binit)) {
         b0 <- binit
-        if (length(b0) != p) stop ("Initial value length does not match with the numbers of covariates.") 
+        if (length(b0) != p) {
+            stop ("Initial value length does not match with the numbers of covariates", call. = FALSE)
+        }
     }
     if (!(is.numeric(binit))) {
         b0 <- rep(1,p)
@@ -760,11 +785,11 @@ aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
     n <- length(clsize)
     Z <- rep(1, N)
     vMB <- vZLCF <- vZLMB <- vsHCF <- vsHMB <- vISCF <- vISMB <- bstep <- NaN
-
+    
     ## Point Estimation
     pe <- aftsrr.pe(beta = btemp1, Y = Y, X = X, delta = delta,
                     clsize = clsize, sigma = SigmaInit, weights = weights,
-                    Z = Z, rankWeights = rankWeights, method = method)
+                    Z = Z, pw = pw, rankWeights = rankWeights, method = method)
     tbeta <- pe$tbeta
     btemp2 <- pe$btemp2
     bconv <- pe$bconv
@@ -785,18 +810,17 @@ aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
                 Z <- rep(rexp(length(clsize)), clsize)
                 vtemp[i,] <- aftsrr.pe(beta = btemp1, Y = Y, X = X, delta = delta,
                                        clsize = clsize, sigma = SigmaInit, weights = weights,
-                                       Z = Z, rankWeights = rankWeights, method = method)$btemp2
+                                       Z = Z, pw = pw, rankWeights = rankWeights,
+                                       method = method)$btemp2
             }
             bhist <- vtemp
             vMB <- var(vtemp)
         }
     }
     if (sum(variance %in% c("ISMB", "ISCF", "ZLMB", "ZLCF", "sZLMB", "sZLCF", "sHMB", "sHCF")) > 0) {
-        if (B > 0) {
-            gw <- get_gw(Y = Y, X = X, beta = btemp2, N = nrow(X), delta = delta,
-                         clsize = clsize, sigma = SigmaInit, weights = weights,
-                         rankWeights = rankWeights)
-        }
+        gw <- getGw(Y = Y, X = X, beta = btemp2, N = nrow(X), delta = delta,
+                     clsize = clsize, sigma = SigmaInit, weights = weights,
+                     rankWeights = rankWeights)
     }
     
     if (sum(variance %in% "ZLCF") > 0) {
@@ -868,11 +892,15 @@ aftsrr.fit <- function(Y, delta, X, id, weights = rep(1, nrow(X)),
 }
 
 
-
 aftsrr.pe <- function(beta, Y, X, delta, clsize, sigma, weights, Z, 
-                      rankWeights, method, control = aftgee.control()) {
+                      rankWeights, method, pw = rep(1, nrow(X)),
+                      control = aftgee.control()) {
     n <- nrow(X)
     bm <- gw <- NULL
+    if (!is.numeric(pw)) {
+        pw <- rep(1, nrow(X))
+    }
+    
     if (rankWeights == "gehan") {
         temp <- solveGehan(beta = beta, Y = Y, X = X, delta = delta, clsize = clsize,
                            sigma = sigma, weights = weights, Z = Z)
@@ -887,7 +915,7 @@ aftsrr.pe <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
             btime <- system.time(temp <- BBsolve(beta, uilogFun, Y = Y, X = X, delta = delta,
                                                  clsize = clsize, sigma = sigma, n = n, Z = Z,
                                                  weights = weights, constant = 0,
-                                                 pw = rep(1, nrow(X)),
+                                                 pw = pw,
                                                  rankWeights = rankWeights, rkmethod = "nonsm",
                                                  quiet = TRUE))
             bstep <- 1
@@ -910,9 +938,7 @@ aftsrr.pe <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
             btemp2 <- temp$par
             bconv <- temp$convergence
         }   
-
-        
-        if (method == "monosm" | rankWeights %in% c("PW", "GP")) {
+        if (method == "monosm" | rankWeights %in% c("PW", "GP", "userdefined")) {
             btemp1 <- solveGehan(beta = beta, Y = Y, X = X, delta = delta,
                                clsize = clsize, sigma = sigma, weights = weights, Z = Z)$beta
             bstep <- 1
@@ -940,3 +966,5 @@ aftsrr.pe <- function(beta, Y, X, delta, clsize, sigma, weights, Z,
     }
     pe <- list(btemp2 = as.numeric(btemp2), btime = btime, bconv = bconv, bstep = bstep)
 }
+
+

@@ -21,27 +21,27 @@
   \tabular{ll}{
     Package: aftgee
     Type: Package
-    Version: 0.4-1
-    Date: 2014-01-26
+    Version: 0.4-3
+    Date: 2014-04-13
     License: GPL(>=3)
     LazyLoad: yes
   }
 }
 \author{
-  Sy Han Chiou \email{steven.chiou@uconn.edu}, Jun Yan
-  \email{jun.yan@uconn.edu}, Sangwook Kang \email{sangwook.kang@uconn.edu}
+  Sy Han Chiou \email{schiou@d.umn.edu},
+  Jun Yan \email{jun.yan@uconn.edu},
+  Sangwook Kang \email{sangwook.kang@uconn.edu}
 }
 \references{
-  Chiou, S. H. and Kang, S. and Yan, J. (2013) Fast Accelerated Failure
-  Time Modeling for Case-cohort Data. Statistics and Computing,
-  pp. 1-10.
-  doi:10.1007/s11222-013-9388-2.
+  Chiou, S. H. and Kang, S. and Yan, J. (2013)
+  Fast Accelerated Failure Time Modeling for Case-Cohort Data.
+  \emph{Statistics and Computing}, forthcoming.
+
+  Chiou, S. H. and Kim, H. and Yan, J. (2014) Semiparametric
+  Multivariate Accelerated Failure Time Model with Generalized
+  Estimating Equations. \emph{Lifetime Data Analysis}, forthcoming.
 
   Jin, Z. and Lin, D. Y. and Ying, Z. (2006) On Least-squares Regression
-  with Censored Data. Biometrika, 90, 341--353.
-
-  Johnson, L. M. and Strawderman, R. L. (2009) Induced Smoothing for the
-  Semiparametric Accelerated Failure Time Model: Asymptotic and
-  Extensions to Clustered Data. Biometrika, 96, 577--590.
+  with Censored Data. \emph{Biometrika}, 90, 341--353.
 }
 \keyword{ aftgee }

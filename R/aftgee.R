@@ -1,4 +1,4 @@
-aftgee <- function(formula, data, subset, id, contrasts = NULL,
+aftgee <- function(formula, data, subset, id = NULL, contrasts = NULL,
                    weights = NULL, margin = NULL,
                    corstr="independence",
                    binit = "srrgehan", B = 100,
@@ -13,28 +13,40 @@ aftgee <- function(formula, data, subset, id, contrasts = NULL,
   mcall[[1]] <- as.name("model.frame")
   m <- eval(mcall, parent.frame())
   y <- model.extract(m, "response")
+  if (ncol(y) > 2) 
+      stop("aftgee only supports Surv object with right censoring", call. = FALSE)
   N <- NROW(y)
   mterms <- attr(m, "terms")
   x <- model.matrix(mterms, m, contrasts) 
   weights <- model.extract(m, weights)
-  if (is.null(weights)) weights <- rep(1, N)
+  if (is.null(weights))
+      weights <- rep(1, N)
   id <- model.extract(m, id)
-  if (is.null(id)) id <- 1:nrow(y)
+  if (is.null(id))
+      id <- 1:nrow(y)
   margin <- model.extract(m, margin)
-  if (is.null(margin)) margin <- rep(1, N)
-  ## xnames <- colnames(x)[-1]
-  out <- aftgee.fit(y = y, x = x, id = id, corstr = corstr, B = B, binit = binit,
-                    weights = weights, margin = margin, control = control)
+  if (is.null(margin))
+      margin <- rep(1, N)
+  out <- NULL
+  if (sum(y[,2]) == nrow(y) & corstr %in% c("indep", "independence")) {
+      warning("Response is uncensored and correlation structure is independence,
+ordinary least squares is used", call. = FALSE)
+      out <- lm(log(y[,1]) ~ x - 1)
+      out$coef.init <- out$coef.res <- out$coefficients
+      out$coefficients <- cbind(out$coefficients, out$coefficients)
+      out$var.res <- vcov(out)
+  }
+  else {
+      out <- aftgee.fit(y = y, x = x, id = id, corstr = corstr, B = B, binit = binit,
+                        weights = weights, margin = margin, control = control)
+  } 
   out$call <- scall
-  ## out$var.name <- xnames
-  ## rownames(out$coefficients) <- rep(c("Intercept", xnames), length(unique(margin)))
   out$y <- y[,1]
   out$x <- x
   rownames(out$coefficients) <- names(out$coef.res) <- names(out$coef.init) <- colnames(out$x)
   out$intercept <- FALSE
-  if (sum(x[,1]) == nrow(x)) {
+  if (sum(x[,1]) == nrow(x)) 
       out$intercept <- TRUE
-  }
   colnames(out$coefficients) <- c("binit", "AFTGEE")
   class(out) <- "aftgee"
   out
@@ -59,22 +71,20 @@ aftgee.fit <- function(y, x, id, corstr="independence",
   clsize <- unlist(lapply(split(id, id), length))
   N <- sum(clsize)
   if (is.numeric(binit)) {
-      if (length(binit) != p) {
-          stop("binit value length does not match with numbers of covariates.")
-      }
+      if (length(binit) != p) 
+          stop("binit value length does not match with numbers of covariates", call. = FALSE)
       firstBeta <- binit      
   }
   if (!(is.numeric(binit))) {
-      if (!(binit %in% c("lm", "srrgehan"))) {
-          stop("Invaid binit value method.")
-      }
+      if (!(binit %in% c("lm", "srrgehan"))) 
+          stop("Invalid binit value method", call. = FALSE)
   }
   Y <- log(y[,1])
   Y <- ifelse(Y == -Inf, 0, Y)
   delta <- y[,2]
   if (!(is.numeric(binit))) {
       if ("(Intercept)" %in% colnames(x)) {
-          xtemp <- x[,-(colnames(x) != "(Intercept)")]
+          xtemp <- as.matrix(x[,-(colnames(x) != "(Intercept)")])
       } else {
           xtemp <- x
       }
@@ -154,7 +164,7 @@ aftgee.control <- function(maxiter = 50,
        trace = trace)
 }
 
-aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, length(y)),
+aftgee.est <- function(y, x, delta, beta, id, corstr = "independence", Z = rep(1, length(y)),
                        margin = rep(1, length(id)), weights = rep(1, length(y)),
                        control = aftgee.control()) {
     xmat <- as.matrix(x) 
@@ -211,8 +221,9 @@ aftgee.est <- function(y, x, delta, beta, id, corstr="independence", Z = rep(1, 
     } ## end i for 1:maxiter
     iniBeta <- geefit$beta
     if ("(Intercept)" %in% colnames(x)) {
-        beta <- c(eRes(e = y - x[,-1] %*% geefit$beta[-1], delta = delta)[[3]],
-                  geefit$beta[-1])
+    ##    beta <- c(eRes(e = y - as.matrix(x[,-1]) %*% geefit$beta[-1], delta = delta)[[3]],
+      ##            geefit$beta[-1])
+beta <- c(mean(yhat - as.matrix(x[,-1]) %*% geefit$beta[-1]), geefit$beta[-1])
     } else {
         beta <- geefit$beta
     }
@@ -237,7 +248,7 @@ eRes <- function(e, delta, z = rep(1, length(e)))
   Shat <- rep(Shat, repeats)
   edif <- c(diff(ei), 0)  ## diff(ei) gives 1 less terms
   ehat <- rev(cumsum(rev(edif * Shat)))
-  inpt <- max(ehat)
+  inpt <- mean(ehat)
   ehat2 <- rev(cumsum(rev(ei * edif * Shat)))
   ehat <- ehat/Shat + ei    ## +ei because there was a diff() in edif
   ehat2 <- 2 * ehat2/Shat + ei^2

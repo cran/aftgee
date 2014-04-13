@@ -5,7 +5,7 @@ importFrom("BB", BBsolve)
 importFrom("survival", Surv, survfit, basehaz, coxph)
 importFrom("geepack", geese, geese.fit)
 
-## export(aftgee.est, aftgee.fit)
+## export(aftsrr.pe, aftsrr.fit, aftgee.est, aftgee.fit, getWi, getSuv, getGw, getPw, solvePW, solveGehan, viClo, getVi)
 
 S3method(print, aftgee)
 S3method(print, aftsrr)

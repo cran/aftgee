@@ -2,11 +2,8 @@
 #include <Rmath.h>
 #include <math.h>
 
-/* uFun    : smoothed Gehan */
-/* unsFun  : non smoothed Gehan */
-/* ulogFun : smoothed log rank */
-
-double get_rikjl(double *X, double *sigma, int *clsize, int *p, int *N, int *n, int ik_idx, int jl_idx) {
+double get_rikjl(double *X, double *sigma,
+		 int *N, int *p, int ik_idx, int jl_idx) {
   double *xdif = Calloc(*p, double);
   double rikjl = 0.0;
   int m = 0, q = 0;
@@ -27,11 +24,9 @@ double get_rikjl(double *X, double *sigma, int *clsize, int *p, int *N, int *n, 
   return(rikjl);
 }
 
-void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize,
-		  double *sigma,
-		  int *n,
-		  int *p,
-		  int *N,
+void abargehanfun(double *beta, double *Y, double *X, 
+		  double *delta, int *clsize, double *sigma,
+		  int *n, int *p, int *N,
 		  double *weights,
 		  double *gehanWeights,
 		  //output
@@ -65,7 +60,7 @@ void abargehanfun(double *beta, double *Y, double *X, double *delta, int *clsize
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -143,7 +138,7 @@ void abarlogfun(double *beta, double *Y, double *X, double *delta, int *clsize, 
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -198,7 +193,6 @@ void ufun(double *beta,
 	  int *n, // numbers of clusters
 	  int *p, // ncol(X), or dimension
 	  int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
-	  //output
 	  double *Z,
 	  double *weights,
 	  double *gehanweights,
@@ -224,7 +218,7 @@ void ufun(double *beta,
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
 	    // if (e[ik_idx] - e[jl_idx] <= 0) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -343,7 +337,7 @@ void ulogfun(double *beta,
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -441,7 +435,7 @@ void lfun(double *beta,
 	  int *n, // numbers of clusters
 	  int *p, // ncol(X), or dimension
 	  int *N, // nrow(X), or numbers of dataset. Also equals to sum(clsize)
-	  double *weights, double *gehanweights,
+	  double *weights, double *gehanweights, 
 	  double *Z,
 	  //output
 	  double *ln) {
@@ -457,9 +451,6 @@ void lfun(double *beta,
     }
     e[i] = Y[i] - e[i];
   }
-
-  /* e is in here, cant compute it else where*/
-
   *ln = 0.0;
   for (i = 0; i < *n; i++) {
     for (k = 0; k < clsize[i]; k++) {
@@ -467,7 +458,7 @@ void lfun(double *beta,
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -582,10 +573,9 @@ void omegafun(double *beta,
 
 
 
-void abarpwfun(double *beta, double *Y, double *X, double *delta, int *clsize, double *pw, double *sigma,
-	       int *n,
-	       int *p,
-	       int *N,
+void abarpwfun(double *beta, double *Y, double *X, double *delta, 
+	       int *clsize, double *pw, double *sigma,
+	       int *n, int *p, int *N,
 	       double *weights,
 	       //output
 	       double *abar) {
@@ -616,7 +606,7 @@ void abarpwfun(double *beta, double *Y, double *X, double *delta, int *clsize, d
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -678,13 +668,13 @@ void getnsgehan (double *beta, double *Y, double *X, int *clsize,
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
-	    if (rikjl != 0) {
+	    //  rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
+	    //  if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      if (edif >= 0) {
 		de[ik_idx] += weights[jl_idx];
 	      }
-	    } // end if rikjl != 0
+	      //  } // end if rikjl != 0
 	    jl_idx++;
 	  } // end for l
 	} // end for j
@@ -724,7 +714,7 @@ void getgehan (double *beta, double *Y, double *X, int *clsize,
 	jl_idx = 0;
 	for (j = 0; j < *n; j++) {
 	  for (l = 0; l < clsize[j]; l++) {
-	    rikjl = get_rikjl(X, sigma, clsize, p, N, n, ik_idx, jl_idx);
+	    rikjl = get_rikjl(X, sigma, N, p, ik_idx, jl_idx);
 	    if (rikjl != 0) {
 	      edif = e[jl_idx] - e[ik_idx];
 	      z = sqrtn * edif / rikjl;
@@ -743,4 +733,279 @@ void getgehan (double *beta, double *Y, double *X, int *clsize,
   /*   abar[r] /= (*n * (*n - 1)); */
   /* } */
   de;
+}
+
+
+void matAfun(double *X, double *sigma, double *delta,
+	  int *clsize, int *n, int *p, int *N, 
+	  double *matA) {
+  int i, j, k, ikId = 0, jlId, l, r, m, q;
+  double *xdif = Calloc(*p, double);
+  double rikjl = 0.0;
+  for (i = 0; i < *n; i++) {
+    for (k = 0; k < clsize[i]; k++) {
+      if (delta[ikId] != 0) {
+	jlId = 0;
+	for (j = 0; j < *n; j++) {
+	  for (l = 0; l < clsize[j]; l++) {
+
+	    for (r = 0; r < *p; r++) {
+	      xdif[r] = 0.0;
+	      xdif[r] = X[ikId + r * *N] - X[jlId + r * *N];
+	    }
+
+	    rikjl = get_rikjl(X, sigma, N, p, ikId, jlId);
+	    if (rikjl != 0) {
+	      for (m = 0; m < *p; m++) {
+		for (q = 0; q < *p; q++) {
+		  matA[q + m * *p] += xdif[m] * xdif[q] * sqrt(*n)/ (rikjl);
+		}
+	      }
+	    }
+	    jlId++;
+	  } // end l
+	} // end j
+      } // end delta[ikId] != 0
+      ikId++;
+    } // end k 
+  } // end i
+  Free(xdif);
+  matA;
+}
+
+
+// Length biase
+
+void ulblk(double*beta, double *Y, double *X, double *delta, double *a, double *lbw,
+	   int *n, int *p, 
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+  double *ea = Calloc(*n, double); 
+  double *nu = Calloc(*p, double); 
+  double de;
+
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+    ea[i] = a[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {
+      for ( r = 0; r < *p; r++) {
+	nu[r] = 0.0;
+      }
+      de = 0.0;
+      for (j = 0; j < *n; j++) {
+	if (ei[i] <= ei[j] && ei[i] > ea[j]) {
+	  for (r = 0; r < *p; r++) {
+	    nu[r] += lbw[j + i * *n] * X[j + r * *n];
+	}
+	  de += lbw[j + i * *n];
+	}
+      } // end j
+      for (r = 0; r < *p; r++) {
+	out[r] += X[i + r * *n] - (nu[r] / de);
+      }
+    } // end delta
+  } // end i
+  Free(e);
+  Free(ea);
+  Free(ei);
+  Free(nu);
+  out;
+}
+
+
+void ulblk2(double*beta, double *Y, double *X, double *delta, double *lbw,
+	   int *n, int *p, 
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+  double *nu = Calloc(*p, double); 
+  double de;
+
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {
+      for ( r = 0; r < *p; r++) {
+	nu[r] = 0.0;
+      }
+      de = 0.0;
+      for (j = 0; j < *n; j++) {
+	if (ei[i] <= ei[j]) {
+	  for (r = 0; r < *p; r++) {
+	    nu[r] += lbw[j + i * *n] * X[j + r * *n];
+	}
+	  de += lbw[j + i * *n];
+	}
+      } // end j
+      for (r = 0; r < *p; r++) {
+	out[r] += X[i + r * *n] - (nu[r] / de);
+      }
+    } // end delta
+  } // end i
+  Free(e);
+  Free(ei);
+  Free(nu);
+  out;
+}
+
+void ulbge(double*beta, double *Y, double *X, double *delta, double *a, int *n, int *p, 
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+  double *ea = Calloc(*n, double); 
+
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+    ea[i] = a[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {    
+      for (j = 0; j < *n; j++) {
+    	if (ei[i] <= ei[j] && ei[i] > ea[j]) {
+	  for (r = 0; r < *p; r++) {
+	    out[r] += X[i + r * *n] - X[j + r * *n];
+	  }
+	}
+      }
+    }
+  }
+  Free(e);
+  Free(ea);
+  Free(ei);
+  out;
+}
+
+void ulbge2(double*beta, double *Y, double *X, double *delta, double *lbw, 
+	    int *n, int *p, double *resamp, 
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {    
+      for (j = 0; j < *n; j++) {
+    	if (ei[i] <= ei[j]) {
+	  for (r = 0; r < *p; r++) {
+	    out[r] += resamp[i] * resamp[j] * (X[i + r * *n] - X[j + r * *n]) * lbw[j + i * *n];
+	  }
+	}
+      }
+    }
+  }
+  Free(e);
+  Free(ei);
+  out;
+}
+
+void ulbsge(double*beta, double *Y, double *X, 
+	    double *delta, double *a, double *sigma, int *n, int *p, 
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+  double *ea = Calloc(*n, double); 
+  double z1, z2, H1, H2, rikjl;
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+    ea[i] = a[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {    
+      for (j = 0; j < *n; j++) {
+	rikjl = get_rikjl(X, sigma, n, p, i, j);
+	if (rikjl != 0) {
+	  z1 = sqrt(*n) * (ea[j] - ei[i]) / rikjl;
+	  z2 = sqrt(*n) * (ei[j] - ei[i]) / rikjl;
+	  H1 = pnorm(z1, 0.0, 1.0, 1, 0);
+	  H2 = pnorm(z2, 0.0, 1.0, 1, 0);
+	  for (r = 0; r < *p; r++) {
+	    out[r] += (X[i + r * *n] - X[j + r * *n]) * (H2 - H1);
+	  }
+	}
+      }
+    }
+  }
+  Free(e);
+  Free(ea);
+  Free(ei);
+  out;
+}
+
+
+void uuge(double*beta, double *Y, double *X, double *delta, double *lbw, double *sigma,
+	  int *n, int *p, double *resamp,
+	   //output 
+	   double *out) {
+  int i, j, r;
+  double z, H, rikjl;
+  double *e = Calloc(*n, double); 
+  double *ei = Calloc(*n, double); 
+
+  for (i = 0; i < *n; i++) {
+    e[i] = 0.0;
+    for (j = 0; j < *p; j++) {
+      e[i] += X[j * *n + i] * beta[j];
+    }
+    ei[i] = Y[i] - e[i];
+  }
+
+  for (i = 0; i < *n; i++) {
+    if (delta[i] != 0) {    
+      for (j = 0; j < *n; j++) {
+	rikjl = get_rikjl(X, sigma, n, p, i, j);
+	if (rikjl != 0) {
+	  z = sqrt(*n) * (ei[j] - ei[i]) / rikjl;
+	  H = pnorm(z, 0.0, 1.0, 1, 0);
+	  for (r = 0; r < *p; r++) {
+	    out[r] += resamp[i] * resamp[j] * (X[i + r * *n] - X[j + r * *n]) * H * lbw[j + i * *n];
+	  }
+	}
+      }
+    }
+    
+  }
+  Free(e);
+  Free(ei);
+  out;
 }
