@@ -901,7 +901,7 @@ void ulbge(double*beta, double *Y, double *X, double *delta, double *a, int *n, 
 }
 
 void ulbge2(double*beta, double *Y, double *X, double *delta, double *lbw, 
-	    int *n, int *p, double *resamp, 
+	    int *n, int *p,
 	   //output 
 	   double *out) {
   int i, j, r;
@@ -921,7 +921,7 @@ void ulbge2(double*beta, double *Y, double *X, double *delta, double *lbw,
       for (j = 0; j < *n; j++) {
     	if (ei[i] <= ei[j]) {
 	  for (r = 0; r < *p; r++) {
-	    out[r] += resamp[i] * resamp[j] * (X[i + r * *n] - X[j + r * *n]) * lbw[j + i * *n];
+	    out[r] += (X[i + r * *n] - X[j + r * *n]) * lbw[j + i * *n];
 	  }
 	}
       }
@@ -974,7 +974,7 @@ void ulbsge(double*beta, double *Y, double *X,
 
 
 void uuge(double*beta, double *Y, double *X, double *delta, double *lbw, double *sigma,
-	  int *n, int *p, double *resamp,
+	  int *n, int *p,
 	   //output 
 	   double *out) {
   int i, j, r;
@@ -998,7 +998,7 @@ void uuge(double*beta, double *Y, double *X, double *delta, double *lbw, double 
 	  z = sqrt(*n) * (ei[j] - ei[i]) / rikjl;
 	  H = pnorm(z, 0.0, 1.0, 1, 0);
 	  for (r = 0; r < *p; r++) {
-	    out[r] += resamp[i] * resamp[j] * (X[i + r * *n] - X[j + r * *n]) * H * lbw[j + i * *n];
+	    out[r] += (X[i + r * *n] - X[j + r * *n]) * H * lbw[j + i * *n];
 	  }
 	}
       }

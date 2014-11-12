@@ -5,14 +5,13 @@
   Accelerated Failure Time with Generalize Estimating Equation
 }
 \description{
-  A package that uses Generalized Estimating Equations (GEE) to estimate
-  Multivariate Accelerated Failure Time Model (AFT).
-  This package allows dependence working correlation structure for GEE.
-  Moreover, it gives two options of initial estimator,
-  the simple linear regression and the smooth-hegan weight estimator.
+  Fits a semiparametric accelerated failure time (AFT) model with
+  least-squares approach.
+  Generalized estimating equation is generalized to multivariate AFT
+  modeling to account for multivariate dependence through working
+  correlation structures to improve efficiency. 
 }
 \usage{
-
 aftgee(formula, data, subset, id = NULL,
        contrasts = NULL, weights = NULL,
        margin = NULL, corstr = "independence",
@@ -101,12 +100,12 @@ aftgee(formula, data, subset, id = NULL,
   Sy Han Chiou, Sangwook Kang, Jun Yan.
 }
 \references{
-  Chiou, S. H. and Kim, H. and Yan, J. (2014) Semiparametric
+  Chiou, S., Kim, J. and Yan, J. (2014) Marginal Semiparametric
   Multivariate Accelerated Failure Time Model with Generalized
-  Estimating Equations. \emph{Lifetime Data Analysis}, forthcoming.
-
+  Estimating Equation. \emph{Life Time Data}, \bold{20}(4): 599--618.
+  
   Jin, Z. and Lin, D. Y. and Ying, Z. (2006) On Least-squares Regression
-  with Censored Data. \emph{Biometrika}, 90, 341--353.
+  with Censored Data. \emph{Biometrika}, \bold{90}, 341--353.
 }
 
 \keyword{ aftgee }

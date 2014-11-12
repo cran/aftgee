@@ -3,10 +3,12 @@
 \alias{summary.aftsrr}
 \title{Accelerated Failure Time with Smooth Rank Regression}
 \description{
-  Fit semiparametric accelerated failure time (AFT) model with
+  Fits a semiparametric accelerated failure time (AFT) model with
   rank-based approach.
-  Fast sandwich variance estimation, general weight functions and
-  additional sampling weights are also incorporated.
+  General weights, additional sampling weights and fast sandwich
+  variance estimations are also incorporated. 
+  Estimating equations are solved with Barzilar-Borwein spectral method
+  implemented as \code{BBsolve} in package \pkg{BB}. 
 }
 \usage{
 aftsrr(formula, data, subset, id = NULL, contrasts = NULL,
@@ -96,21 +98,32 @@ estimating equations.
 }
 
 \references{
-  Chiou, S. H. and Kang, S. and Yan, J. (2013)
-  Fast Accelerated Failure Time Modeling for Case-Cohort Data.
-  \emph{Statistics and Computing}, forthcoming.
+  Chiou, S., Kang, S. and Yan, J. (2014) Fast Accelerated Failure Time
+  Modeling for Case-Cohort Data. \emph{Statistics and Computing},
+  \bold{24}(4): 559--568
 
-  Zeng, D. and Lin, D. Y. (2008)
-  Efficient Resampling Methods for Nonsmooth Estimating Functions.
-  \emph{Biostatistics}, \bold{9}, 355--363
-
+  Chiou, S., Kang, S. and Yan, J. (2014) Fitting Accelerated Failure
+  Time Model in Routine Survival Analysis with {R} Package
+  \pkg{Aftgee}. 
+  \emph{Journal of Statistical Software}, \bold{61}(11): 1--23
+ 
   Huang, Y. (2002)
   Calibration Regression of Censored Lifetime Medical Cost.
   \emph{Journal of American Statistical Association}, \bold{97}, 318--327
 
   Johnson, L. M. and Strawderman, R. L. (2009)
-  Induced Smoothing for the Semiparametric Accelerated Failure Time Model: Asymptotic and Extensions to Clustered Data.
+  Induced Smoothing for the Semiparametric Accelerated Failure Time
+  Model: Asymptotic and Extensions to Clustered Data.
   \emph{Biometrika}, \bold{96}, 577 -- 590
+
+  Varadhan, R. and Gilbert, P. (2009)
+  BB: An R Package for Solving a Large System of Nonlinear Equations and
+  for Optimizing a High-Dimensional Nonlinear Objective Function.
+  \emph{Journal of Statistical Software}, \bold{32}(4): 1--26
+  
+  Zeng, D. and Lin, D. Y. (2008)
+  Efficient Resampling Methods for Nonsmooth Estimating Functions.
+  \emph{Biostatistics}, \bold{9}, 355--363
 }
 
 \author{

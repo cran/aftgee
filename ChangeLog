@@ -1,47 +1,5 @@
+2014-11-12 Sy Han Chiou <schiou@d.umn.edu>
+	* Version updated to published version. 
+	
 2014-04-08 Sy Han Chiou <schiou@d.umn.edu>
 	* changes made based on comments from JSS paper
-
-2013-12-09 Sy Han Chiou <schiou@d.umn.edu>
-	* summary with B = 0
-	* print aftsrr
-	* changes in responds to JSS revision
-	
-2013-10-25 Sy Han Chiou <schiou@d.umn.edu>
-	* Rename smoothrr with aftsrr
-	* Code clearned
-	* add method to aftsrr
-
-2013-09-24 Sy Han Chiou <schiou@d.umn.edu>
-	* Added Iterative approach with monotone function
-
-2013-07-16 Sy Han Chiou <schiou@d.umn.edu>
-	* Modified the smoothrr function so that no matter intercept is specified, smoothrr only analyze without intercept
-	* Some Generic functions (coef, vcov, residuals) were added
-
-2013-05-26
-	* Case cohort weight applied to least square approach
-	* General weights with gehan's estimating equation
-
-2013-05-15  Sy Han Chiou <steven.chiwqou@uconn.edu>
-	* Changed contact eamil from steven.chiou@huskymail.uconn.edu to steven.chiou@uconn.edu
-	* Argument ID is no longer required by when cluster sizes are one
-
-2013-04-12  Sy Han Chiou <steven.chiou@uconn.edu>
-	* added extension to GP weight
-	* removed gehan weight in PW
-
-2013-03-19  Sy Han Chiou <steven.chiou@uconn.edu>
-	* added iterative procedure for general weights in rank-based approach.
-	* added gehan weight in PW
-
-2013-01-02  Sy Han Chiou <steven.chiou@uconn.edu>
-	* report the sample beta used in MB
-	* changes to pass R 2.15.2
-
-2012-10-17  Sy Han Chiou <steven.chiou@uconn.edu>
-	* More changes in CF
-
-2012-10-13  Sy Han Chiou <steven.chiou@uconn.edu>
-	* Some names changed, arguments' order re-arranged
-	* CF for clustered data
-
