@@ -10,8 +10,8 @@ print.aftgee <- function(x, ...) {
 print.aftsrr <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
-  cat("Coefficients:\n")
-  print(x$beta)
+  cat("\n Coefficients:\n")
+  print(coef(x))
 }
 
 summary.aftgee <- function(object,...){
@@ -33,7 +33,8 @@ summary.aftgee <- function(object,...){
   rownames(TAB) <- names(z$coef.res)
   ## binit part
   est.ini <- z$coef.init
-  res <- list(call=object$call, coefficients=TAB, binit = z$binit, iniEst = z$iniEst, est.ini = z$coef.init)
+  res <- list(call = object$call, coefficients=TAB, binit = z$binit,
+              iniEst = z$iniEst, est.ini = z$coef.init)
   class(res) <- "summary.aftgee"
   res
 }
@@ -44,33 +45,25 @@ summary.aftsrr <- function(object,...){
     stop("Most be aftsrr class")
   }
   ans <- z["call"]
-  var.meth <- z$var.meth[z$var.meth %in% c("MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
+  var.meth <- z$var.meth[z$var.meth %in%
+                         c("NULL", "MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
   se.count <- length(var.meth)
   se.name <- match(var.meth, names(z$covmat))
-  ## if (z$intercept == TRUE) {
-  ##     z$beta <- z$beta[-1]
-  ##     for (i in se.name) {
-  ##         z$covmat[[i]] <- z$covmat[[i]][-1, -1]
-  ##     }
-  ##     z$vari.name <- z$vari.name[-1]
-  ## }
-  ## se.covmat <- z$covmat[[se.name]]
   est.srr <- z$beta
   p <- length(z$beta)
   TAB.srr <- NULL
-  ##  se.covmat <- list(NULL)
-  ##  se.covmat[se.count + 1] <- NULL
   for (i in 1:se.count) {
       se.srr <- NA
-      if (z$B != 0) {
+      if (z$B != 0 & z$var.meth[1] != "NULL") {
           se.srr <- sqrt(diag(z$covmat[[se.name[i]]]))
       }
       z.val.srr <- as.numeric(est.srr)/as.numeric(se.srr)
-      temp.srr <- cbind(Estimate = round(est.srr, 3), StdErr = round(se.srr, 3), z.value = round(z.val.srr, 3), p.value = round(2 * pnorm(-abs(z.val.srr)), 3))
+      temp.srr <- cbind(Estimate = round(est.srr, 3), StdErr = round(se.srr, 3),
+                        z.value = round(z.val.srr, 3), p.value = round(2 * pnorm(-abs(z.val.srr)), 3))
       rownames(temp.srr) <- z$vari.name
       TAB.srr <- append(TAB.srr, list(temp.srr))
   }
-  res <- list(call = object$call, coefficients = TAB.srr, var.name = names(z$covmat)[se.name])
+  res <- list(call = object$call, coefficients = TAB.srr, var.name = var.meth)
   class(res) <- "summary.aftsrr"
   res
 }
@@ -82,31 +75,6 @@ print.summary.aftgee <- function(x, ...){
   cat("AFTGEE Estimator")
   cat("\n")
   printCoefmat(as.matrix(x$coefficients), P.values = TRUE, has.Pvalue = TRUE)
-  ## if (is.numeric(x$binit) != TRUE) {
-  ##     if (x$binit == "lm") {
-  ##         cat("Initial Estimator from lm:")
-  ##         cat("\n")
-  ##         cat(format(round(as.numeric(x$est.ini), digits = 5), nsmall = 5))
-  ##     }
-  ##     if (x$binit == "srrgehan") {
-  ##         cat("Initial Estimator from aftsrr with Gehan's weight:")
-  ##         cat("\n")
-  ##         cat(format(round(as.numeric(x$est.ini), digits = 5), nsmall = 5))
-  ##     }
-  ##     cat("\n")
-  ##     cat("AFTGEE Estimator:")
-  ##     cat("\n")
-  ##     printCoefmat(x$coefficients, P.values = TRUE, has.Pvalue = TRUE)
-  ## }
-  ## if (is.numeric(x$binit) == TRUE) {
-  ##     cat("Gehan Estimator:")
-  ##     cat("\n")
-  ##     cat(format(round(as.numeric(x$est.ini), digits = 5), nsmall = 5))
-  ##     cat("\n")
-  ##     cat("AFTGEE Estimator")
-  ##     cat("\n")
-  ##     printCoefmat(as.matrix(x$coefficients), P.values = TRUE, has.Pvalue = TRUE)
-  ## }
 }
 
 

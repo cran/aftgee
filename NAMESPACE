@@ -1,11 +1,17 @@
-useDynLib(aftgee)
+useDynLib(aftgee, .registration = TRUE)
 export(aftgee, aftsrr, aftgee.control)
 importFrom("MASS", ginv)
-importFrom("BB", BBsolve)
+importFrom("BB", BBsolve, dfsane)
 importFrom("survival", Surv, survfit, basehaz, coxph)
 importFrom("geepack", geese, geese.fit)
+importFrom("parallel", parLapply, makeCluster, clusterExport, stopCluster, detectCores)
 
-## export(aftsrr.pe, aftsrr.fit, aftgee.est, aftgee.fit, getWi, getSuv, getGw, getPw, solvePW, solveGehan, viClo, getVi, viEmp)
+importFrom("methods", "getClass")
+importFrom("graphics", "boxplot")
+importFrom("stats", "approx", "coef", "complete.cases", "lm", 
+           "model.extract", "model.matrix", "pnorm", "printCoefmat",
+           "rexp", "rnorm", "var", "vcov", "weights")
+importFrom("utils", "vi")
 
 S3method(print, aftgee)
 S3method(print, aftsrr)

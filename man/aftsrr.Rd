@@ -12,11 +12,13 @@
 }
 \usage{
 aftsrr(formula, data, subset, id = NULL, contrasts = NULL,
-       strata = NULL, weights = NULL, rankWeights = "gehan",
-       method = "sm", variance = "ISMB", B = 100, SigmaInit = NULL, 
-       control = aftgee.control())
+       weights = NULL, B = 100,
+       rankWeights = c("gehan", "logrank", "pw", "gp", "userdefined"),
+       eqType = c("is", "ns", "mns", "mis"),
+       se = c("NULL", "bootstrap", "MB", "ZLCF", "ZLMB", "sHCF", "sHMB",
+"ISCF", "ISMB"), 
+       control = list())
        }
-
 \arguments{
   \item{formula}{ a formula expression, of the form \code{response ~ predictors}.
     The \code{response} is a \code{Surv} object object with right censoring.
@@ -35,9 +37,6 @@ aftsrr(formula, data, subset, id = NULL, contrasts = NULL,
   }
   \item{contrasts}{ an optional list.
   }
-  \item{strata}{ a vector which identifies strata.
-    This can also be used to distinct case-cohort sampling and stratified sampling.
-  }
   \item{weights}{ an optional vector of observation weights.
   }
   \item{rankWeights}{ a character string specifying the type of general
@@ -48,19 +47,21 @@ aftsrr(formula, data, subset, id = NULL, contrasts = NULL,
     \code{PW}: Prentice-Wilcoxon weight,
     \code{GP}: GP class weight.
   }
-  \item{method}{ a character string specifying the methods to estimate
-    the regression parameter.
+  \item{eqType}{ a character string specifying the type of the
+    estimating equation used to obtain the regression parameters.
     The following are permitted:
     \code{nonsm}: Regression parameters are estimated by directly solving the nonsmooth
 estimating equations.
-    \code{sm}: Regression parameters are estimated by directly solving the smoothed
+    \code{sm}: Regression parameters are estimated by directly solving the induced-smoothing
 estimating equations.
     \code{monosm}:Regression parameters are estimated by iterating the
   monotonic smoothed estimating equations. This is typical when
   \code{rankWeights = "PW"} and \code{rankWeights = "GP"}.
   }  
-  \item{variance}{ a character string specifying the covariance estimating method.
+  \item{se}{ a character string specifying the estimating method for the
+    variance-covariance matrix.
     The following are permitted:
+    \code{bootstrap}: nonparametric bootstrap,
     \code{MB}: multiplier resampling,
     \code{ZLCF}: Zeng and Lin's approach with closed form Si,
     \code{ZLMB}: Zeng and Lin's approach with empirical Si,
@@ -72,8 +73,6 @@ estimating equations.
   }
   \item{B}{ a numeric value specifies the resampling number.
     When B = 0, only the beta estimate will be displayed.
-  }
-  \item{SigmaInit}{ the initial covariance matrix; default at identity matrix.
   }
   \item{control}{ controls maxiter and tolerance.
   }
@@ -134,8 +133,8 @@ estimating equations.
 #### kidney data
 library(survival)
 data(kidney)
-foo <- aftsrr(Surv(time, status) ~ age + sex - 1, id = id,
-                data = kidney, variance = c("ISMB", "ZLMB"), B = 10)
+foo <- aftsrr(Surv(time, status) ~ age + sex, id = id,
+                data = kidney, se = c("ISMB", "ZLMB"), B = 10)
 foo
 
 #### nwtco data
@@ -151,7 +150,7 @@ nwtco$study <- nwtco$study - 3
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
 fit <- aftsrr(Surv(edrel, rel) ~ histol + age12 + study, id = seqno,
-       weights = hi, data = sub, B = 10, variance = c("ISMB", "ZLMB"),
+       weights = hi, data = sub, B = 10, se = c("ISMB", "ZLMB"),
        subset = stage == 4)
 summary(fit)
 }
