@@ -1502,8 +1502,10 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                   sigma = diag(ncol(X)), gpweight = 1){
   p <- ncol(X)
   clsize <- unlist(lapply(split(id, id), length))
-  n <- sum(unlist(lapply(split(weights, id), unique)))
-  N <- sum(weights)
+  ## n <- sum(unlist(lapply(split(weights, id), unique)))
+  ## N <- sum(weights)
+  n <- length(clsize)
+  N <- length(weights)
   UnV <- zmat <- matrix(0, ncol = B, nrow = p)
   for (i in 1:B) {
     if ( mb == TRUE) {
