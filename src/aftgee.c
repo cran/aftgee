@@ -23,7 +23,8 @@ double get_rikjl(double *X, double *sigma,
 }
 
 // Gehan type objective function (smooth); old name = lfun
-void gehan_s_obj(double *beta, double *Y, double *X, double *delta, int *clsize, double *sigma, int *n,
+void gehan_s_obj(double *beta, double *Y, double *X, double *delta,
+		 int *clsize, double *sigma, int *n,
 	  int *p, int *N, double *weights, double *gehanweights, double *ln) {
   int i, j, k, l, ik_idx = 0, jl_idx;
   double rikjl, edif, z, H, h, sqrtn = sqrt(*n);

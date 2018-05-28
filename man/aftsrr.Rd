@@ -134,7 +134,7 @@ estimating equations.
 library(survival)
 data(kidney)
 foo <- aftsrr(Surv(time, status) ~ age + sex, id = id,
-                data = kidney, se = c("ISMB", "ZLMB"), B = 10)
+                data = kidney, se = c("ISMB", "ZLMB"), B = 8)
 foo
 
 #### nwtco data
@@ -150,7 +150,7 @@ nwtco$study <- nwtco$study - 3
 nwtco$histol = nwtco$histol - 1
 sub <- nwtco[subinx,]
 fit <- aftsrr(Surv(edrel, rel) ~ histol + age12 + study, id = seqno,
-       weights = hi, data = sub, B = 10, se = c("ISMB", "ZLMB"),
+       weights = hi, data = sub, B = 8, se = c("ISMB", "ZLMB"),
        subset = stage == 4)
 summary(fit)
 }

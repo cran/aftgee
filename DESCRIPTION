@@ -2,8 +2,8 @@ Package: aftgee
 Type: Package
 Title: Accelerated Failure Time Model with Generalized Estimating
         Equations
-Version: 1.1-1
-Date: 2018-05-06
+Version: 1.1-2
+Date: 2018-05-28
 Author: Sy Han (Steven) Chiou, Sangwook Kang, Jun Yan
 Maintainer: Sy Han (Steven) Chiou  <schiou@utdallas.edu>
 Description: A collection of methods for both the rank-based estimates and least
@@ -24,7 +24,7 @@ License: GPL (>= 3)
 Imports: MASS, BB, survival, geepack, parallel, methods
 Suggests: copula
 LazyLoad: yes
-Packaged: 2018-05-06 17:22:04 UTC; schiou
+Packaged: 2018-05-28 18:13:33 UTC; schiou
 NeedsCompilation: yes
 Repository: CRAN
-Date/Publication: 2018-05-07 17:18:05 UTC
+Date/Publication: 2018-05-28 22:58:57 UTC
