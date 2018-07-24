@@ -1,3 +1,4 @@
+#' @export
 print.aftgee <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
@@ -7,6 +8,7 @@ print.aftgee <- function(x, ...) {
   print(x$coef.init)
 }
 
+#' @export
 print.aftsrr <- function(x, ...) {
   cat("Call:\n")
   print(x$call)
@@ -14,6 +16,7 @@ print.aftsrr <- function(x, ...) {
   print(coef(x))
 }
 
+#' @export
 summary.aftgee <- function(object,...){
   z <- object
   if (class(z) != "aftgee"){
@@ -23,7 +26,8 @@ summary.aftgee <- function(object,...){
   TAB.ini <- NULL
   ## aftgee part
   est.gee <- z$coef.res
-  se.gee <- sqrt(diag(z$var.res))
+  if (is.null(z$var.res)) {se.gee <- rep(NaN, length(est.gee))
+  } else {se.gee <- sqrt(diag(z$var.res))}
   est.temp.gee <- ifelse(se.gee == "NaN", "NaN", est.gee)
   z.val.gee <- as.numeric(est.temp.gee)/as.numeric(se.gee)
   TAB <- cbind(Estimate = round(est.gee, 3),
@@ -39,6 +43,7 @@ summary.aftgee <- function(object,...){
   res
 }
 
+#' @export
 summary.aftsrr <- function(object,...){
   z <- object
   if (class(z) != "aftsrr"){
@@ -46,7 +51,7 @@ summary.aftsrr <- function(object,...){
   }
   ans <- z["call"]
   var.meth <- z$var.meth[z$var.meth %in%
-                         c("NULL", "MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
+                         c("NULL", "bootstrap", "MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
   se.count <- length(var.meth)
   se.name <- match(var.meth, names(z$covmat))
   est.srr <- z$beta
@@ -68,6 +73,7 @@ summary.aftsrr <- function(object,...){
   res
 }
 
+#' @export
 print.summary.aftgee <- function(x, ...){
   cat("Call:\n")
   print(x$call)
@@ -77,7 +83,7 @@ print.summary.aftgee <- function(x, ...){
   printCoefmat(as.matrix(x$coefficients), P.values = TRUE, has.Pvalue = TRUE)
 }
 
-
+#' @export
 print.summary.aftsrr <- function(x, ...){
   se.count <- length(x$var.name)
   cat("Call:\n")
@@ -90,7 +96,7 @@ print.summary.aftsrr <- function(x, ...){
   }
 }
 
-
+#' @export
 coef.aftsrr <- function(object, ...){
   z <- object
   if (class(z) != "aftsrr"){
@@ -102,7 +108,7 @@ coef.aftsrr <- function(object, ...){
   out
 }
 
-
+#' @export
 residuals.aftsrr <- function(object, ...){
   z <- object
   if (class(z) != "aftsrr"){
@@ -113,7 +119,7 @@ residuals.aftsrr <- function(object, ...){
   out
 }
 
-
+#' @export
 vcov.aftsrr <- function(object, ...){
   z <- object
   if (class(z) != "aftsrr"){
@@ -137,6 +143,7 @@ vcov.aftsrr <- function(object, ...){
   out
 }
 
+#' @export
 coef.aftgee <- function(object, ...){
   z <- object
   if (class(z) != "aftgee"){
@@ -147,7 +154,7 @@ coef.aftgee <- function(object, ...){
   out
 }
 
-
+#' @export
 vcov.aftgee <- function(object, ...){
   z <- object
   if (class(z) != "aftgee"){
@@ -158,7 +165,7 @@ vcov.aftgee <- function(object, ...){
   out
 }
 
-
+#' @export
 residuals.aftgee <- function(object, ...){
   z <- object
   if (class(z) != "aftgee"){
@@ -169,7 +176,7 @@ residuals.aftgee <- function(object, ...){
   out
 }
 
-
+#' @export
 predict.aftsrr <- function(object, newdata = NULL, se.fit = FALSE, type = "lp", ...){
   z <- object
   out <- NULL
@@ -179,7 +186,6 @@ predict.aftsrr <- function(object, newdata = NULL, se.fit = FALSE, type = "lp", 
           out$fit <- as.numeric(exp(out$fit))
       }
   }
-
   if (!is.null(newdata)) {
       n <- as.matrix(newdata, ncol = length(z$beta))
       out$fit <- as.numeric(n %*% z$beta)
@@ -215,6 +221,7 @@ predict.aftsrr <- function(object, newdata = NULL, se.fit = FALSE, type = "lp", 
   out
 }
 
+#' @export
 predict.aftgee <- function(object, newdata = NULL, se.fit = FALSE, ...){
     z <- object
     out <- NULL
@@ -225,7 +232,6 @@ predict.aftgee <- function(object, newdata = NULL, se.fit = FALSE, ...){
     if (is.null(newdata)) {
         out$fit <- z$x %*% z$coef.res
     }
-
     if (!is.null(newdata)) {
         n <- as.matrix(newdata, ncol = length(z$coef.res))
         if (z$intercept == TRUE & ncol(n) < length(z$coef.res)) {
@@ -236,6 +242,5 @@ predict.aftgee <- function(object, newdata = NULL, se.fit = FALSE, ...){
             out$se.fit <- sqrt(diag(n %*% z$var.res %*% t(n)))
         }
     }
-
     out
 }
