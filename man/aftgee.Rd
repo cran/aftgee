@@ -4,13 +4,13 @@
 \alias{aftgee}
 \title{Least-Squares Approach for Accelerated Failure Time with Generalized Estimating Equation}
 \usage{
-aftgee(formula, data, subset, id = NULL, contrasts = NULL, weights = NULL,
-  margin = NULL, corstr = "independence", binit = "srrgehan", B = 100,
-  control = aftgee.control())
+aftgee(formula, data, subset, id = NULL, contrasts = NULL,
+  weights = NULL, margin = NULL, corstr = "independence",
+  binit = "srrgehan", B = 100, control = aftgee.control())
 }
 \arguments{
 \item{formula}{a formula expression, of the form \code{response ~ predictors}.
-The \code{response} is a \code{Surv} object object with right censoring.
+The \code{response} is a \code{Surv} object with right censoring.
 In the case of no censoring, \code{aftgee} will return an ordinary
 least estimate when \code{corstr = "independence"}.
 See the documentation of \code{lm}, \code{coxph} and \code{formula} for details.}
@@ -82,16 +82,11 @@ Generalized estimating equation is generalized to multivariate AFT modeling to a
 for multivariate dependence through working correlation structures to improve efficiency.
 }
 \examples{
-library(survival)
-library(copula)
-datgen <- function(n = 100, tau = 0.3, cen = 75.4, dim = 2) {
-    kt <- iTau(claytonCopula(1), tau)
-    copula <- claytonCopula(kt, dim = dim)
+datgen <- function(n = 100, tau = 0.3, cen = 100, dim = 2) {
     id <- rep(1:n, rep(dim, n))
     x1 <- rbinom(dim * n, 1, 0.5)
     x2 <- rnorm(dim * n)
-    ed <- mvdc(copula, rep("weibull", dim), rep(list(list(shape = 1)), dim))
-    e <- c(t(rMvdc(n, ed)))
+    e <- c(t(exp(MASS::mvrnorm(n = n, mu = rep(0, dim), Sigma = tau + (1 - tau) * diag(dim)))))
     T <- exp(2 + x1 + x2 + e)
     cstime <- runif(n, 0, cen)
     delta <- (T < cstime) * 1
@@ -101,10 +96,8 @@ datgen <- function(n = 100, tau = 0.3, cen = 75.4, dim = 2) {
 }
 set.seed(1)
 mydata <- datgen(n = 50, dim = 2)
-summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata,
-               id = id, corstr = "ind", B = 8))
-summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata,
-               id = id, corstr = "ex", B = 8))
+summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata, id = id, corstr = "ind", B = 8))
+summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata, id = id, corstr = "ex", B = 8))
 }
 \references{
 Chiou, S., Kim, J. and Yan, J. (2014) Marginal Semiparametric Multivariate

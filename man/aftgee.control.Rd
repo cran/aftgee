@@ -5,7 +5,8 @@
 \title{Auxiliary for Controlling AFTGEE Fitting}
 \usage{
 aftgee.control(maxiter = 50, reltol = 0.001, trace = FALSE,
-  seIni = FALSE, parallel = FALSE, parCl = parallel::detectCores()/2)
+  seIni = FALSE, parallel = FALSE, parCl = parallel::detectCores()/2,
+  gp.pwr = -999)
 }
 \arguments{
 \item{maxiter}{max number of iteration.}
@@ -19,7 +20,9 @@ for each resampling sample in variance estimation.}
 
 \item{parallel}{an logical value indicating whether parallel computing is used for resampling and bootstrap.}
 
-\item{parCl}{an integer value indicating the number of CPU cores used when \code{parallel = TRUE}.
+\item{parCl}{an integer value indicating the number of CPU cores used when \code{parallel = TRUE}.}
+
+\item{gp.pwr}{an numerical value indicating the GP parameter when \code{rankWeights = GP}.
 The default value is half the CPU cores on the current host.}
 }
 \value{

@@ -5,7 +5,7 @@
 #' for multivariate dependence through working correlation structures to improve efficiency.
 #'
 #' @param formula  a formula expression, of the form \code{response ~ predictors}.
-#'     The \code{response} is a \code{Surv} object object with right censoring.
+#'     The \code{response} is a \code{Surv} object with right censoring.
 #'     In the case of no censoring, \code{aftgee} will return an ordinary
 #'     least estimate when \code{corstr = "independence"}.
 #'     See the documentation of \code{lm}, \code{coxph} and \code{formula} for details.
@@ -66,33 +66,11 @@
 #' @references Jin, Z. and Lin, D. Y. and Ying, Z. (2006)
 #' On Least-squares Regression with Censored Data. \emph{Biometrika}, \bold{90}, 341--353.
 #'
+#' @importFrom geepack geese geese.fit
 #' @export
 #' @keywords aftgee
 #'
-#' @examples
-#' library(survival)
-#' library(copula)
-#' datgen <- function(n = 100, tau = 0.3, cen = 75.4, dim = 2) {
-#'     kt <- iTau(claytonCopula(1), tau)
-#'     copula <- claytonCopula(kt, dim = dim)
-#'     id <- rep(1:n, rep(dim, n))
-#'     x1 <- rbinom(dim * n, 1, 0.5)
-#'     x2 <- rnorm(dim * n)
-#'     ed <- mvdc(copula, rep("weibull", dim), rep(list(list(shape = 1)), dim))
-#'     e <- c(t(rMvdc(n, ed)))
-#'     T <- exp(2 + x1 + x2 + e)
-#'     cstime <- runif(n, 0, cen)
-#'     delta <- (T < cstime) * 1
-#'     Y <- pmin(T, cstime)
-#'     out <- data.frame(T = T, Y = Y, delta = delta, x1 = x1, x2 = x2, id = rep(1:n, each = dim))
-#'     out
-#' }
-#' set.seed(1)
-#' mydata <- datgen(n = 50, dim = 2)
-#' summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata,
-#'                id = id, corstr = "ind", B = 8))
-#' summary(aftgee(Surv(Y, delta) ~ x1 + x2, data = mydata,
-#'                id = id, corstr = "ex", B = 8))
+#' @example inst/examples/ex_aftgee.R
 aftgee <- function(formula, data, subset, id = NULL, contrasts = NULL,
                    weights = NULL, margin = NULL, 
                    corstr="independence",
@@ -132,20 +110,21 @@ aftgee <- function(formula, data, subset, id = NULL, contrasts = NULL,
     DF <- as.data.frame(DF)
     out <- NULL
     if (sum(DF$status) == nrow(DF)) {
-        cat("Response is uncensored, ordinary least squares fitted with GEE is used.\n")
-        cat("An geese object is returned.\n")
-        out <- geese(as.formula(paste("log(time) ~ ", formula)[2]), data = DF, corstr = corstr)
-        return(out)
-        ## out$coef.init <- out$coef.res <- out$coefficients
-        ## out$coefficients <- cbind(out$coefficients, out$coefficients)
-        ## out$var.res <- vcov(out)
+        cat("There is no censoring in the data, ordinary least squares approach is fitted via geese.\n")
+        out$geese <- geese(as.formula(paste("log(time) ~ ", formula)[2]),
+                           weights = weights, id = id, data = DF, corstr = corstr)
+        out$coef.init <- out$coef.res <- out$geese$beta
+        out$coefficients <- cbind(out$coef.init, out$coef.res)
+        out$var.res <- out$geese$vbeta
     }
     else {
-        out <- aftgee.fit(DF = DF, corstr = corstr, B = B, binit = binit, control = control, yint = yint)
+        out <- aftgee.fit(DF = DF, corstr = corstr, B = B,
+                          binit = binit, control = control, yint = yint)
     } 
     out$y <- DF$time
     out$x <- DF[,-(1:5)]
-    rownames(out$coefficients) <- names(out$coef.res) <- names(out$coef.init) <- colnames(model.matrix(mterms, m, contrasts))
+    rownames(out$coefficients) <- names(out$coef.res) <-
+        names(out$coef.init) <- colnames(model.matrix(mterms, m, contrasts))
     ## out$intercept <- (sum(x[,1]) == nrow(x))
     colnames(out$coefficients) <- c("binit", "AFTGEE")
     out$call <- scall
@@ -156,7 +135,7 @@ aftgee <- function(formula, data, subset, id = NULL, contrasts = NULL,
 aftgee.fit <- function(DF, corstr="independence",
                        B = 100, binit = "lm", yint = TRUE,
                        control = aftgee.control()) {
-    x <- as.matrix(DF[,-(1:5)])
+    x <- as.matrix(DF[,-(1:5), drop = FALSE])
     id <- DF$id
     n <- length(unique(id))
     rm <- NULL
@@ -239,9 +218,7 @@ aftgee.fit <- function(DF, corstr="independence",
             vhat <- var(t(bsamp))
         } ## end parallel 
     }
-    if (B == 0) {
-        vhat <- NULL
-    }
+    if (B == 0) vhat <- NULL
     ini.beta <- c(binitValue$beta)
     ini.sd <- c(binitValue$sd)
     ini.sdMat <- c(binitValue$sdMat)
@@ -249,6 +226,10 @@ aftgee.fit <- function(DF, corstr="independence",
                 coef.res = result$beta,
                 var.res = vhat,
                 varMargin = result$gamma,
+                gee.vbeta = result$vbeta,
+                gee.vbeta.naiv = result$vbeta.naiv,
+                gee.vbeta0 = result$vbeta0,
+                gee.vbeta.naiv0 = result$vbeta.naiv0,
                 alpha = result$alpha,
                 coef.init = ini.beta,
                 sd.init = ini.sd,
@@ -278,14 +259,17 @@ aftgee.fit <- function(DF, corstr="independence",
 #' for each resampling sample in variance estimation.
 #' @param parallel an logical value indicating whether parallel computing is used for resampling and bootstrap.
 #' @param parCl an integer value indicating the number of CPU cores used when \code{parallel = TRUE}.
+#' @param gp.pwr an numerical value indicating the GP parameter when \code{rankWeights = GP}.
 #' The default value is half the CPU cores on the current host.
 #'
 #' @export
 #' @return A list with the arguments as components.
 #' @seealso \code{\link{aftgee}}
 aftgee.control <- function(maxiter = 50, reltol = 0.001, trace = FALSE,
-                           seIni = FALSE, parallel = FALSE, parCl = parallel::detectCores() / 2) {
-    list(maxiter = maxiter, reltol = reltol, trace = trace, seIni = seIni, parallel = parallel, parCl = parCl)
+                           seIni = FALSE, parallel = FALSE,
+                           parCl = parallel::detectCores() / 2, gp.pwr = -999) {
+    list(maxiter = maxiter, reltol = reltol, trace = trace, seIni = seIni,
+         parallel = parallel, parCl = parCl, gp.pwr = gp.pwr)
 }
 
 aftgee.est <- function(y, x, delta, beta, id, corstr = "independence", Z = rep(1, length(y)),
@@ -301,9 +285,9 @@ aftgee.est <- function(y, x, delta, beta, id, corstr = "independence", Z = rep(1
             e <- y - xmat %*% beta
             eres <- eRes(e, delta = delta, z = Z * weights)
             yhat <- delta * y + (1 - delta) * (eres[[1]] + xmat %*% beta)
-            yhatZ <- sqrt(Z) * yhat
-            xmatZ <- sqrt(Z) * xmat
-            geefit <- geese.fit(xmatZ, yhatZ, id, corstr = corstr, weights =  weights)
+            yhatZ <- sqrt(Z * weights) * yhat
+            xmatZ <- sqrt(Z * weights) * xmat
+            geefit <- geese.fit(xmatZ, yhatZ, id, corstr = corstr)
         }
         if (length(unique(margin)) != 1L) {
             e <- y - xmat %*% beta
@@ -323,19 +307,25 @@ aftgee.est <- function(y, x, delta, beta, id, corstr = "independence", Z = rep(1
             yhatZ <- sqrt(Z * weights) * yhat
             xmatZ <- sqrt(Z * weights) * xmat
             er2 <- as.matrix(eres2[margin])
-            ## geefit <- geese.fit(xmat, yhat, id, zsca = er2, scale.fix = TRUE, corstr = corstr, weights = Z * weights)
             geefit <- geese.fit(xmatZ, yhatZ, id, zsca = er2, scale.fix = TRUE, corstr = corstr)
         }
         beta <- geefit$beta
         if (control$trace) cat("\n beta:", as.numeric(beta), "\n")
         convStep <- i
         if (max(abs(beta - betaprev) / abs(beta)) <= control$reltol) break
-    } ## end i for 1:maxiter
+    } 
+    ## Fitting independence structure at convergence for QIC calculation
+    if (length(unique(margin)) == 1L) geefit0 <- geese.fit(xmatZ, yhatZ, id, corstr = "independence")
+    else geefit0 <- geese.fit(xmatZ, yhatZ, id, zsca = er2, scale.fix = TRUE, corstr = "independence")
     beta <- iniBeta <- geefit$beta
     alpha <- geefit$alpha
     gamma <- geefit$gamma ## eres2
     convergence <- ifelse(i == control$maxiter, 1, 0)
     out <- list(beta = beta, alpha = alpha, gamma = gamma, iniBeta = iniBeta,
+                ## variance matrix from geefit
+                vbeta = geefit$vbeta, vbeta.naiv = geefit$vbeta.naiv,
+                vbeta0 = geefit0$vbeta, vbeta.naiv0 = geefit0$vbeta.naiv,
+                ## iteration info.
                 convergence = convergence, convStep = convStep)
     return(out)
 }

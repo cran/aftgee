@@ -20,23 +20,23 @@ rankFit.gehan.is <- function(DF, engine, stdErr, gw = NULL) {
         .C("gehan_s_obj", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(1), PACKAGE = "aftgee")[[12]]
+           out = double(1), PACKAGE = "aftgee")$out
     }
     gehan.est <- function(b) {
         .C("gehan_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[12]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver,list(par = engine@b0, fn = gehan.est,
-                                           quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                           quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                     do.call(engine@solver,list(par = double(p), fn = gehan.est,
-                                               quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                               quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -72,23 +72,23 @@ rankFit.gehan.ns <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("gehan_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.integer(length(clsize)), as.integer(p),
                   as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[11]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     gehan.est <- function(b) {
         .C("gehan_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.integer(length(clsize)), as.integer(p),
            as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[11]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(do.call(engine@solver, list(par = engine@b0, fn = gehan.est, quiet = TRUE,
-                                                        control = list(tol = engine@tol, trace = FALSE))),
+                                                        control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                             error = function(e)
                                 do.call(engine@solver, list(par = double(p), fn = gehan.est, quiet = TRUE,
-                                                            control = list(tol = engine@tol, trace = FALSE)))))
+                                                            control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -123,24 +123,24 @@ rankFit.logrank.is <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[12]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     log.est <- function(b) {
         .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[12]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = log.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                     do.call(engine@solver, list(par = double(p), fn = log.est,
-                                                quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                                quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -176,24 +176,24 @@ rankFit.logrank.ns <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[11]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     log.est <- function(b) {
         .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[11]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = log.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                     do.call(engine@solver, list(par = double(p), fn = log.est,
-                                                quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                                quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -231,7 +231,7 @@ rankFit.logrank.mns <- function(DF, engine, stdErr, gw = NULL) {
     for (i in 1:engine@maxIter) {
         gw <- 1 / .C("gehan_ns_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                      as.integer(length(clsize)), as.integer(p), as.integer(n), as.double(W),
-                     double(n), PACKAGE = "aftgee")[[9]]
+                     out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
         b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
         engine@b0 <- b2
@@ -266,10 +266,9 @@ rankFit.logrank.mis <- function(DF, engine, stdErr, gw = NULL) {
         gw <- 1 / .C("gehan_s_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                      as.double(engine@sigma0), as.integer(length(clsize)), 
                      as.integer(p), as.integer(n), as.double(W),
-                     double(n), PACKAGE = "aftgee")[[10]]
+                     out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
-        b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
-        engine@b0 <- b2
+        engine@b0 <- b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -301,7 +300,7 @@ rankFit.pw.is <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[12]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     pw.est <- function(b) {
@@ -311,17 +310,17 @@ rankFit.pw.is <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[12]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = pw.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                 do.call(engine@solver, list(par = double(p), fn = pw.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -359,7 +358,7 @@ rankFit.pw.ns <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[11]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     pw.est <- function(b) {
@@ -369,17 +368,17 @@ rankFit.pw.ns <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[11]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
       if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = pw.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                     do.call(engine@solver, list(par = double(p), fn = pw.est,
-                                                quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                                quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
                 end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -419,9 +418,9 @@ rankFit.pw.mns <- function(DF, engine, stdErr, gw = NULL) {
         s0 <- approx(tmp$time, tmp$surv, er, "constant", yleft = 1, yright = min(tmp$surv))$y
         gw <- s0 / .C("gehan_ns_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                       as.integer(length(clsize)), as.integer(p), as.integer(n), as.double(W),
-                      double(n), PACKAGE = "aftgee")[[9]]
+                      out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
-        b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -456,9 +455,9 @@ rankFit.pw.mis <- function(DF, engine, stdErr, gw = NULL) {
         gw <- s0 / .C("gehan_s_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                       as.double(engine@sigma0), as.integer(length(clsize)),
                       as.integer(p), as.integer(n), as.double(W),
-                      double(n), PACKAGE = "aftgee")[[10]]
+                      out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
-        b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -483,8 +482,7 @@ rankFit.gp.is <- function(DF, engine, stdErr, gw = NULL) {
     if (is.null(gw)) gw <- rep(1, n)
     p <- ncol(X)
     clsize <- as.numeric(unlist(lapply(split(id, id), length)))
-    pwr <- ifelse(is.null(engine@gp.pwr), 1 / ncol(X), engine@gp.pwr)
-    if (pwr < 0) stop("Invalid GP class power.", call. = FALSE)
+    pwr <- ifelse(engine@gp.pwr < 0, 1 / ncol(X), engine@gp.pwr)
     gp.obj <- function(b) {
         er <- Y - X %*% b
         tmp <- survfit(Surv(er, delta) ~ 1, weights = W)
@@ -494,7 +492,7 @@ rankFit.gp.is <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[12]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     gp.est <- function(b) {
@@ -506,17 +504,17 @@ rankFit.gp.is <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[12]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
       if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = gp.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                     do.call(engine@solver, list(par = double(p), fn = gp.est,
-                                                quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                                quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -547,8 +545,7 @@ rankFit.gp.ns <- function(DF, engine, stdErr, gw = NULL) {
     if (is.null(gw)) gw <- rep(1, n)
     p <- ncol(X)
     clsize <- as.numeric(unlist(lapply(split(id, id), length)))
-    pwr <- ifelse(is.null(engine@gp.pwr), 1 / ncol(X), engine@gp.pwr)
-    if (pwr < 0) stop("Invalid GP class power.", call. = FALSE)
+    pwr <- ifelse(engine@gp.pwr < 0, 1 / ncol(X), engine@gp.pwr)
     gp.obj <- function(b) {
         er <- Y - X %*% b
         tmp <- survfit(Surv(er, delta) ~ 1, weights = W)
@@ -558,7 +555,7 @@ rankFit.gp.ns <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[11]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     gp.est <- function(b) {
@@ -570,17 +567,17 @@ rankFit.gp.ns <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[11]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
       if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = gp.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                 do.call(engine@solver, list(par = double(p), fn = gp.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
         end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -612,20 +609,19 @@ rankFit.gp.mns <- function(DF, engine, stdErr, gw = NULL) {
     p <- ncol(X)
     clsize <- as.numeric(unlist(lapply(split(id, id), length)))
     b1 <- rankFit.gehan.ns(DF, engine, stdErr)$beta
-    pwr <- ifelse(is.null(engine@gp.pwr), 1 / ncol(X), engine@gp.pwr)
-    if (pwr < 0) stop("Invalid GP class power.", call. = FALSE)
+    pwr <- ifelse(engine@gp.pwr < 0, 1 / ncol(X), engine@gp.pwr)
     iter <- 1
     start.time <- Sys.time()
     for (i in 1:engine@maxIter) {
         er <- Y - X %*% b1
         tmp <- survfit(Surv(er, delta) ~ 1, weights = W)
         s0 <- approx(tmp$time, tmp$surv, er, "constant", yleft = 1, yright = min(tmp$surv))$y
+        s0 <- s0^pwr
         gw <- s0 / .C("gehan_ns_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                       as.integer(length(clsize)), as.integer(p), as.integer(n), as.double(W),
-                      double(n), PACKAGE = "aftgee")[[9]]
-        gw <- gw^pwr
+                      out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
-        b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -650,8 +646,7 @@ rankFit.gp.mis <- function(DF, engine, stdErr, gw = NULL) {
     gw <- rep(1, n)
     p <- ncol(X)
     clsize <- as.numeric(unlist(lapply(split(id, id), length)))
-    pwr <- ifelse(is.null(engine@gp.pwr), 1 / ncol(X), engine@gp.pwr)
-    if (pwr < 0) stop("Invalid GP class power.", call. = FALSE)
+    pwr <- ifelse(engine@gp.pwr < 0, 1 / ncol(X), engine@gp.pwr)
     b1 <- rankFit.gehan.is(DF, engine, stdErr)$beta
     iter <- 1
     start.time <- Sys.time()
@@ -659,13 +654,13 @@ rankFit.gp.mis <- function(DF, engine, stdErr, gw = NULL) {
         er <- Y - X %*% b1
         tmp <- survfit(Surv(er, delta) ~ 1, weights = W)
         s0 <- approx(tmp$time, tmp$surv, er, "constant", yleft = 1, yright = min(tmp$surv))$y
+        s0 <- s0^pwr
         gw <- s0 / .C("gehan_s_wt", as.double(b1), as.double(Y), as.double(X), as.integer(clsize),
                       as.double(engine@sigma0), as.integer(length(clsize)),
                       as.integer(p), as.integer(n), as.double(W),
-                      double(n), PACKAGE = "aftgee")[[10]]
-        gw <- gw^pwr
+                      out = double(n), PACKAGE = "aftgee")$out
         gw <- ifelse(gw == Inf, 0, gw)
-        b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -695,7 +690,7 @@ rankFit.user.is <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[12]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     user.est <- function(b) {
@@ -703,17 +698,17 @@ rankFit.user.is <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_s_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.double(engine@sigma0), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[12]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
     if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = user.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                 do.call(engine@solver, list(par = double(p), fn = user.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
                 end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -750,7 +745,7 @@ rankFit.user.ns <- function(DF, engine, stdErr, gw = NULL) {
         ans <- .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
                   as.integer(clsize), as.integer(length(clsize)),
                   as.integer(p), as.integer(n), as.double(W), as.double(gw),
-                  double(p), PACKAGE = "aftgee")[[11]]
+                  out = double(p), PACKAGE = "aftgee")$out
         return(sum(ans^2))
     }
     user.est <- function(b) {
@@ -758,17 +753,17 @@ rankFit.user.ns <- function(DF, engine, stdErr, gw = NULL) {
         .C("log_ns_est", as.double(b), as.double(Y), as.double(X), as.double(delta),
            as.integer(clsize), as.integer(length(clsize)),
            as.integer(p), as.integer(n), as.double(W), as.double(gw),
-           double(p), PACKAGE = "aftgee")[[11]]
+           out = double(p), PACKAGE = "aftgee")$out
     }
       if (engine@solver %in% c("BBsolve", "dfsane")) {
         start.time <- Sys.time()
         suppressWarnings(
             fit <- tryCatch(
                 do.call(engine@solver, list(par = engine@b0, fn = user.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE))),
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE))),
                 error = function(e)
                 do.call(engine@solver, list(par = double(p), fn = user.est,
-                                            quiet = TRUE, control = list(tol = engine@tol, trace = FALSE)))))
+                                            quiet = TRUE, control = list(tol = engine@tol, M = engine@M, noimp = 10 * engine@M, trace = FALSE)))))
                 end.time <- Sys.time()
     }
     if (engine@solver == "BBoptim") {
@@ -805,7 +800,7 @@ rankFit.user.mns <- function(DF, engine, stdErr, gw = NULL) {
     start.time <- Sys.time()
     for (i in 1:engine@maxIter) {
         gw <- engine@userRk
-        b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.ns(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -835,7 +830,7 @@ rankFit.user.mis <- function(DF, engine, stdErr, gw = NULL) {
     start.time <- Sys.time()
     for (i in 1:engine@maxIter) {
         gw <- engine@userRk
-        b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
+        engine@b0 <- b2 <- rankFit.gehan.is(DF, engine, stdErr, gw)$beta
         iter <- iter + 1
         if (engine@trace) print(b2)
         if (max(abs(b1 - b2)) < engine@tol) {
@@ -883,7 +878,7 @@ rankFit.Engine.bootstrap <- function(DF, engine, stdErr, gw) {
             rankFit(DF = DF2, engine = engine, stdErr = NULL, gw = NULL)$beta})
         stopCluster(cl)
         betaVar <- t(out)
-        return(c(fit, list(betaVar = varOut(betaVar))))
+        return(c(fit, list(betaVar = varOut(betaVar), bhist = rmOut(betaVar))))
     }
     for (i in 1:B) {
         sampled.id <- sample(unique(id), n, TRUE)
@@ -892,7 +887,7 @@ rankFit.Engine.bootstrap <- function(DF, engine, stdErr, gw) {
         DF2$id <- rep(1:n, clsz[sampled.id])
         betaVar[i,] <- rankFit(DF = DF2, engine = engine, stdErr = NULL, gw = NULL)$beta
     }
-    return(c(fit, list(betaVar = varOut(betaVar))))
+    return(c(fit, list(betaVar = varOut(betaVar), bhist = rmOut(betaVar))))
 }
 
 rankFit.Engine.mb <- function(DF, engine, stdErr, gw) {
@@ -922,7 +917,7 @@ rankFit.Engine.mb <- function(DF, engine, stdErr, gw) {
             rankFit(DF = DF2, engine = engine, stdErr = NULL, gw = NULL)$beta}))
         stopCluster(cl)
         betaVar <- t(matrix(out, p))
-        return(c(fit, list(betaVar = varOut(betaVar))))
+        return(c(fit, list(betaVar = varOut(betaVar), bhist = rmOut(betaVar))))
     }
     for (i in 1:B) {
         DF2 <- DF
@@ -930,7 +925,7 @@ rankFit.Engine.mb <- function(DF, engine, stdErr, gw) {
         DF2$weights <- DF2$weights * Z
         betaVar[i,] <- rankFit(DF = DF2, engine = engine, stdErr = NULL, gw = NULL)$beta
     }
-    return(c(fit, list(betaVar = varOut(betaVar))))
+    return(c(fit, list(betaVar = varOut(betaVar), bhist = rmOut(betaVar))))
 }
 
 ## rankFit.logrank.zl <- function(DF, engine, stdErr, gw) {
@@ -1020,9 +1015,9 @@ rankFit.Engine.mb <- function(DF, engine, stdErr, gw) {
 ## Point estimator
 setClass("Engine",
          representation(tol = "numeric", b0 = "numeric", sigma0 = "matrix",
-                        userRk = "numeric", maxIter = "numeric",
+                        userRk = "numeric", M = "numeric", maxIter = "numeric", 
                         solver = "character", trace = "logical"),
-         prototype(tol = 1e-3, b0 = 0, sigma0 = matrix(0), userRk = 0,
+         prototype(tol = 1e-3, b0 = 0, sigma0 = matrix(0), userRk = 0, M = 10,
                    maxIter = 50, solver = "dfsane", trace = FALSE),
          contains = "VIRTUAL")
 
@@ -1036,37 +1031,42 @@ setClass("logrank.ns", contains = "Engine")
 setClass("logrank.mis", contains = "Engine")
 setClass("logrank.mns", contains = "Engine")
 
-setClass("pw.is", contains = "Engine")
-setClass("pw.ns", contains = "Engine")
-setClass("pw.mis", contains = "Engine")
-setClass("pw.mns", contains = "Engine")
+setClass("PW.is", contains = "Engine")
+setClass("PW.ns", contains = "Engine")
+setClass("PW.mis", contains = "Engine")
+setClass("PW.mns", contains = "Engine")
+
+setClass("GP.is", contains = "Engine")
+setClass("GP.ns", contains = "Engine")
+setClass("GP.mis", contains = "Engine")
+setClass("GP.mns", contains = "Engine")
 
 setClass("user.is", contains = "Engine")
 setClass("user.ns", contains = "Engine")
 setClass("user.mis", contains = "Engine")
 setClass("user.mns", contains = "Engine")
 
-setClass("gp.ns",
+setClass("GP.ns",
          representation(gp.pwr = "numeric"),
-         prototype(gp.pwr = NULL),
+         prototype(gp.pwr = -999),
          contains = "Engine")
-setClass("gp.is",
+setClass("GP.is",
          representation(gp.pwr = "numeric"),
-         prototype(gp.pwr = NULL),
+         prototype(gp.pwr = -999),
          contains = "Engine")
-setClass("gp.mis",
+setClass("GP.mis",
          representation(gp.pwr = "numeric"),
-         prototype(gp.pwr = NULL),
+         prototype(gp.pwr = -999),
          contains = "Engine")
-setClass("gp.mns",
+setClass("GP.mns",
          representation(gp.pwr = "numeric"),
-         prototype(gp.pwr = NULL),
+         prototype(gp.pwr = -999),
          contains = "Engine")
 
 ## Variance
 setClass("stdErr",
          representation(tol = "numeric", B = "numeric", parallel = "logical", parCl = "numeric"),
-         prototype(tol = 1e-3, B = 100, parallel = FALSE, parCl = parallel::detectCores() / 2),
+         prototype(tol = 1e-3, B = 100, parallel = FALSE, parCl = round(parallel::detectCores() / 2)),
          contains = "VIRTUAL")
 
 setClass("bootstrap", contains = "stdErr")
@@ -1096,15 +1096,15 @@ setMethod("rankFit", signature(engine = "logrank.ns", stdErr = "NULL"), rankFit.
 setMethod("rankFit", signature(engine = "logrank.mns", stdErr = "NULL"), rankFit.logrank.mns)
 setMethod("rankFit", signature(engine = "logrank.mis", stdErr = "NULL"), rankFit.logrank.mis)
 
-setMethod("rankFit", signature(engine = "pw.is", stdErr = "NULL"), rankFit.pw.is)
-setMethod("rankFit", signature(engine = "pw.ns", stdErr = "NULL"), rankFit.pw.ns)
-setMethod("rankFit", signature(engine = "pw.mns", stdErr = "NULL"), rankFit.pw.mns)
-setMethod("rankFit", signature(engine = "pw.mis", stdErr = "NULL"), rankFit.pw.mis)
+setMethod("rankFit", signature(engine = "PW.is", stdErr = "NULL"), rankFit.pw.is)
+setMethod("rankFit", signature(engine = "PW.ns", stdErr = "NULL"), rankFit.pw.ns)
+setMethod("rankFit", signature(engine = "PW.mns", stdErr = "NULL"), rankFit.pw.mns)
+setMethod("rankFit", signature(engine = "PW.mis", stdErr = "NULL"), rankFit.pw.mis)
 
-setMethod("rankFit", signature(engine = "gp.is", stdErr = "NULL"), rankFit.gp.is)
-setMethod("rankFit", signature(engine = "gp.ns", stdErr = "NULL"), rankFit.gp.ns)
-setMethod("rankFit", signature(engine = "gp.mns", stdErr = "NULL"), rankFit.gp.mns)
-setMethod("rankFit", signature(engine = "gp.mis", stdErr = "NULL"), rankFit.gp.mis)
+setMethod("rankFit", signature(engine = "GP.is", stdErr = "NULL"), rankFit.gp.is)
+setMethod("rankFit", signature(engine = "GP.ns", stdErr = "NULL"), rankFit.gp.ns)
+setMethod("rankFit", signature(engine = "GP.mns", stdErr = "NULL"), rankFit.gp.mns)
+setMethod("rankFit", signature(engine = "GP.mis", stdErr = "NULL"), rankFit.gp.mis)
 
 setMethod("rankFit", signature(engine = "user.is", stdErr = "NULL"), rankFit.user.is)
 setMethod("rankFit", signature(engine = "user.ns", stdErr = "NULL"), rankFit.user.ns)
@@ -1133,6 +1133,21 @@ setMethod("rankFit", signature(engine = "Engine", stdErr = "ISMB"), rankFit.Engi
 #' Estimating equations are solved with Barzilar-Borwein spectral method implemented as
 #' \code{BBsolve} in package \pkg{BB}.
 #'
+#' When \code{se = "bootstrap"} or \code{se = "MB"}, the variance-covariance matrix
+#' is estimated through a bootstrap fashion.
+#' Bootstrap samples that failed to converge are removed when computing the empirical variance matrix.
+#' When bootstrap is not called, we assume the variance-covariance matrix has a sandwich form
+#' \deqn{\Sigma = A^{-1}V(A^{-1})^T,}
+#' where \eqn{V} is the asymptotic variance of the estimating function and
+#' \eqn{A} is the slope matrix.
+#' In this package, we provide seveal methods to estimate the variance-covariance
+#' matrix via this sandwich form, depending on how \eqn{V} and \eqn{A} are estimated.
+#' Specifically, the asymptotic variance, \eqn{V}, can be estimated by either a
+#' closed-form formulation (\code{CF}) or through bootstrap the estimating equations (\code{MB}).
+#' On the other hand, the methods to estimate the slope matrix \eqn{A} are
+#' the inducing smoothing approach (\code{IS}), Zeng and Lin's approach (\code{ZL}),
+#' and the smoothed Huang's approach (\code{sH}).
+#'
 #' @param formula a formula expression, of the form \code{response ~ predictors}.
 #'     The \code{response} is a \code{Surv} object object with right censoring.
 #'     See the documentation of \code{lm}, \code{coxph} and \code{formula} for details.
@@ -1147,7 +1162,7 @@ setMethod("rankFit", signature(engine = "Engine", stdErr = "ISMB"), rankFit.Engi
 #' @param contrasts an optional list.
 #' @param weights an optional vector of observation weights.
 #' @param B a numeric value specifies the resampling number.
-#'     When B = 0, only the beta estimate will be displayed.
+#'     When \code{B = 0} or \code{se = NULL}, only the beta estimate will be displayed.
 #' @param rankWeights a character string specifying the type of general weights.
 #'     The following are permitted:
 #' \describe{
@@ -1155,36 +1170,52 @@ setMethod("rankFit", signature(engine = "Engine", stdErr = "ISMB"), rankFit.Engi
 #'   \item{\code{gehan}}{Gehan's weight}
 #'   \item{\code{PW}}{Prentice-Wilcoxon weight}
 #'   \item{\code{GP}}{GP class weight}
+#'   \item{\code{userdefined}}{a user defined weight provided as a vector
+#' with length equal to the number of subject. This argument is still under-development.}
 #' }
 #' @param eqType a character string specifying the type of the
 #'     estimating equation used to obtain the regression parameters.
 #'     The following are permitted:
 #' \describe{
-#'   \item{\code{nonsm}}{Regression parameters are estimated by directly solving the nonsmooth
+#'   \item{\code{is}}{Regression parameters are estimated by directly solving the
+#' induced-smoothing estimating equations. This is the default and recommended method.}
+#'   \item{\code{ns}}{Regression parameters are estimated by directly solving the nonsmooth
 #' estimating equations.}
-#'   \item{\code{sm}}{Regression parameters are estimated by directly solving the
-#' induced-smoothing estimating equations.}
-#'   \item{\code{monosm}}{Regression parameters are estimated by iterating the
-#'   monotonic smoothed estimating equations. This is typical when
+#'   \item{\code{mis}}{Regression parameters are estimated by iterating the
+#' monotonic smoothed Gehan-based estimating equations. This is typical when
+#'   \code{rankWeights = "PW"} and \code{rankWeights = "GP"}.}
+#'   \item{\code{mns}}{Regression parameters are estimated by iterating the
+#' monotonic non-smoothed Gehan-based estimating equations. This is typical when
 #'   \code{rankWeights = "PW"} and \code{rankWeights = "GP"}.}
 #' }
 #' @param se a character string specifying the estimating method for the variance-covariance matrix.
 #'   The following are permitted:
 #' \describe{
-#'   \item{\code{bootstrap}}{nonparametric bootstrap,}
+#'   \item{\code{NULL}}{if \code{se} is specified as \code{NULL},
+#' the variance-covariance matrix will not be computed.}
+#'   \item{\code{bootstrap}}{nonparametric bootstrap.}
 #'   \item{\code{MB}}{multiplier resampling.}
-#'   \item{\code{ZLCF}}{Zeng and Lin's approach with closed form Si.}
-#'   \item{\code{ZLMB}}{Zeng and Lin's approach with empirical Si.}
-#'   \item{\code{sHCF}}{Huang's approach with closed form Si.}
-#'   \item{\code{sHMB}}{Huang's approach with empirical Si.}
-#'   \item{\code{ISCF}}{Johnson and Strawderman's sandwich variance estimates with closed form Si.}
-#'   \item{\code{ISMB}}{Johnson and Strawderman's sandwich variance estimates with empirical Si.}
-#'   \item{\code{js}}{Johnson and Strawderman's iterating approach.}
+#'   \item{\code{ZLCF}}{Zeng and Lin's approach with closed form \eqn{V}, see \bold{Details}.}
+#'   \item{\code{ZLMB}}{Zeng and Lin's approach with empirical \eqn{V}, see \bold{Details}.}
+#'   \item{\code{sHCF}}{Huang's approach with closed form \eqn{V}, see \bold{Details}.}
+#'   \item{\code{sHMB}}{Huang's approach with empirical \eqn{V}, see \bold{Details}.}
+#'   \item{\code{ISCF}}{Johnson and Strawderman's sandwich variance estimates with closed form \eqn{V}, see \bold{Details}.}
+#'   \item{\code{ISMB}}{Johnson and Strawderman's sandwich variance estimates with empirical \eqn{V}, see \bold{Details}.}
+##   \item{\code{js}}{Johnson and Strawderman's iterating approach.}
 #' }
 #' @param control controls equation solver, maxiter, tolerance, and resampling variance estimation.
 #' The available equation solvers are \code{BBsolve} and \code{dfsane} of the \pkg{BB} package.
+#' The default algorithm control parameters are used when these functions are called.
+#' However, the monotonicity parameter, \code{M}, can be specified by users via the control list.
+#' When \code{M} is specified, the merit parameter, \code{noimp}, is set at \deqn{10 * M}.
+#' The readers are refered to the \pkg{BB} package for details.
 #' Instead of searching for the zero crossing, options including \code{BBoptim} and \code{optim}
 #' will return solution from maximizing the corresponding objective function.
+#' When \code{se = "bootstrap"} or \code{se = "MB"},
+#' an additional argument \code{parallel = TRUE} can be specified to
+#' enable parallel computation.
+#' The number of CPU cores can be specified with \code{parCl},
+#' the default number of CPU cores is the integer value of \code{detectCores() / 2}.
 #'
 #' @export
 #'
@@ -1225,34 +1256,11 @@ setMethod("rankFit", signature(engine = "Engine", stdErr = "ISMB"), rankFit.Engi
 #' \emph{Biostatistics}, \bold{9}, 355--363
 #'
 #' @export
-#' @examples
-#' ## kidney data
-#' library(survival)
-#' data(kidney)
-#' foo <- aftsrr(Surv(time, status) ~ age + sex, id = id,
-#'                 data = kidney, se = c("ISMB", "ZLMB"), B = 10)
-#' foo
-#'
-#' ## nwtco data
-#' library(survival)
-#' data(nwtco)
-#' subinx <- sample(1:nrow(nwtco), 668, replace = FALSE)
-#' nwtco$subcohort <- 0
-#' nwtco$subcohort[subinx] <- 1
-#' pn <- table(nwtco$subcohort)[[2]] / sum(table(nwtco$subcohort))
-#' nwtco$hi <- nwtco$rel + ( 1 - nwtco$rel) * nwtco$subcohort / pn
-#' nwtco$age12 <- nwtco$age / 12
-#' nwtco$study <- nwtco$study - 3
-#' nwtco$histol = nwtco$histol - 1
-#' sub <- nwtco[subinx,]
-#' fit <- aftsrr(Surv(edrel, rel) ~ histol + age12 + study, id = seqno,
-#'        weights = hi, data = sub, B = 10, se = c("ISMB", "ZLMB"),
-#'        subset = stage == 4)
-#' summary(fit)
+#' @example inst/examples/ex_aftsrr.R
 aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL, 
                    weights = NULL, B = 100, 
-                   rankWeights = c("gehan", "logrank", "pw", "gp", "userdefined"),
-                   eqType = c("is", "ns", "mns", "mis"),
+                   rankWeights = c("gehan", "logrank", "PW", "GP", "userdefined"),
+                   eqType = c("is", "ns", "mis", "mns"),
                    se = c("NULL", "bootstrap", "MB", "ZLCF", "ZLMB",
                           "sHCF", "sHMB", "ISCF", "ISMB"),
                    control = list()) {
@@ -1274,8 +1282,6 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
     id <- model.extract(m, id)
     mterms <- attr(m, "terms")
     weights <- model.extract(m, weights) 
-    ## if (missing(data)) obj <- eval(formula[[2]], parent.frame())
-    ## if (!missing(data)) obj <- eval(formula[[2]], data)
     obj <- unclass(m[,1]) 
     if (class(m[[1]]) != "Surv" || ncol(obj) > 2)
         stop("aftsrr only supports Surv object with right censoring.", call. = FALSE)
@@ -1286,9 +1292,6 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
     if (formula == ~1) DF <- cbind(obj, zero = 0)
     else {
         DF <- cbind(obj, id, weights, model.matrix(mterms, m, contrasts))
-        ## remove intercept
-        ## if (sum(colnames(DF) == "(Intercept)") > 0)
-        ## print("Rank-based estimation assumes no-intercept model.")
         if (sum(colnames(DF) == "(Intercept)") > 0)
             DF <- DF[,-which(colnames(DF) == "(Intercept)")]
     }
@@ -1297,16 +1300,17 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
     method <- paste(rkWeights, ".", eqType, sep = "")
     engine.control <- control[names(control) %in% names(attr(getClass(method), "slots"))]
     engine <- do.call("new", c(list(Class = method), engine.control))
-    if (engine@b0 == 0) {
-        lm.formula <- paste("log(time)", paste(formula, collapse = ""))
-        engine@b0 <- as.numeric(coef(lm(lm.formula, data = DF[,-(2:4)])))[-1]
+    if (length(engine@b0) == 1 && engine@b0 == 0) {
+        engine@b0 <- coef(lm(log(DF[,1]) ~ as.matrix(DF[,-(1:4)])))[-1]
+        engine@b0 <- as.numeric(engine@b0)
+        ## lm.formula <- paste("log(time)", paste(formula, collapse = ""))
+        ## engine@b0 <- as.numeric(coef(lm(lm.formula, data = DF[,-(2:4)])))[-1]
     }
     if (length(engine@b0) != ncol(DF) - 4) 
         stop ("Initial value length does not match with the numbers of covariates", call. = FALSE)
     if (engine@sigma0 == 0) engine@sigma0 <- diag(length(engine@b0))
     if (rkWeights == "userdefined" & length(engine@userRk) != nrow(DF))
         stop("Invalid userdefined rank weight values.", call. = FALSE)
-    ## #####################################################################################
     ## Easy patch for now (3/15/2018);
     stdErr.control <- control[names(control) %in% names(attr(getClass(se[1]), "slots"))]
     stdErr <- do.call("new", c(list(Class = se[1]), stdErr.control))
@@ -1319,6 +1323,7 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
     n <- nrow(DF)
     p <- ncol(X)
     clsize <- as.numeric(unlist(lapply(split(id, id), length)))
+    bhist <- NULL 
     if (sum(se %in% "NULL")) {
         fit <- rankFit(DF = DF, engine = engine, stdErr = NULL, gw = NULL)
         covmat <- matrix(NA, p, p)
@@ -1329,10 +1334,12 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
         if (sum(se %in% "bootstrap") > 0) {        
             fit <- rankFit(DF = DF, engine = engine, stdErr = stdErr, gw = NULL)
             vBoot <- fit$betaVar
+            bhist <- fit$bhist
         }
         if (sum(se %in% "MB") > 0) {
             fit <- rankFit(DF = DF, engine = engine, stdErr = stdErr, gw = NULL)
             vMB <- fit$betaVar
+            bhist <- fit$bhist
         }
         if (sum(se %in% c("ISMB", "ISCF", "ZLMB", "ZLCF", "sZLCF", "sHMB", "sHCF")) > 0) {
             gw <- getGw(Y = Y, X = X, beta = fit$beta, N = nrow(DF), delta = delta,
@@ -1360,7 +1367,6 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
         }
         if (sum(se %in% "ISCF") > 0) {
             if (B > 0) {
-                ## ISCF only for gehan
                 vISCF <- isFun(beta = fit$beta, Y = Y, delta = delta, X = X, id = id,
                                weights = W, sigma = engine@sigma0, B = B, vClose = TRUE,
                                gw = gw, rankWeights = rkWeights, stratify = TRUE)
@@ -1396,8 +1402,7 @@ aftsrr <- function(formula, data, subset, id = NULL, contrasts = NULL,
                        sHCF = vsHCF, sHMB = vsHMB,
                        ISCF = vISCF, ISMB = vISMB)        
     }
-    out <- list(beta = fit$beta, covmat = covmat, convergence = fit$conv, bstep = fit$iter,
-                var.meth = se, bhist = NULL)
+    out <- list(beta = fit$beta, covmat = covmat, convergence = fit$conv, bstep = fit$iter, var.meth = se, bhist = bhist)
     class(out) <- "aftsrr"
     out$call <- scall
     out$vari.name <- colnames(X)
@@ -1416,6 +1421,11 @@ varOut <- function(dat, na.rm = TRUE) {
     var(dat, na.rm = na.rm)
 }
 
+rmOut <- function(dat, na.rm = TRUE) {
+    dat[which(dat %in% boxplot(dat, plot = FALSE)$out)] <- NA
+    dat <- dat[complete.cases(dat),]
+}
+
 ##############################################################################
 
 abargehanfun <- function(beta, Y, X, delta, clsize, sigma, weights, gw = rep(1, nrow(X))) {
@@ -1426,7 +1436,7 @@ abargehanfun <- function(beta, Y, X, delta, clsize, sigma, weights, gw = rep(1, 
     matrix(.C("abargehanfunC", as.double(beta), as.double(Y), as.double(X), as.double(delta),
               as.integer(clsize), as.double(sigma), as.integer(n), as.integer(p),
               as.integer(N), as.double(weights), as.double(gw),
-              as.double(a), PACKAGE = "aftgee")[[12]], nrow = p)
+              out = as.double(a), PACKAGE = "aftgee")$out, nrow = p)
 }
 
 
@@ -1438,7 +1448,7 @@ abarlogfun <- function(beta, Y, X, delta, clsize, sigma, weights, pw = rep(1, nr
     matrix(.C("abarlogfunC", as.double(beta), as.double(Y), as.double(X), as.double(delta),
               as.integer(clsize), as.double(pw), as.double(sigma), as.integer(n),
               as.integer(p), as.integer(N), as.double(weights),
-              as.double(a), PACKAGE = "aftgee")[[12]], nrow = p)
+              out = as.double(a), PACKAGE = "aftgee")$out, nrow = p)
 }
 
 abarpwfun <- function(beta, Y, X, delta, clsize, sigma, weights, pw) {
@@ -1449,8 +1459,9 @@ abarpwfun <- function(beta, Y, X, delta, clsize, sigma, weights, pw) {
     pt1 <- matrix(.C("abarpwfunC", as.double(beta), as.double(Y), as.double(X),
                      as.double(delta), as.integer(clsize), as.double(pw$fhat),
                      as.double(sigma), as.integer(n), as.integer(p), as.integer(N),
-                     as.double(weights), as.double(a), PACKAGE = "aftgee")[[11]], p)
-    ## pt1 <- uilogFun(beta, Y, X, delta, clsize, sigma, n, Z = rep(1, nrow(X)), weights, smooth = TRUE, constant = 0, s = 0, pw = pw$fhat)
+                     as.double(weights), out = as.double(a), PACKAGE = "aftgee")$out, p)
+    ## pt1 <- uilogFun(beta, Y, X, delta, clsize, sigma, n,
+    ## Z = rep(1, nrow(X)), weights, smooth = TRUE, constant = 0, s = 0, pw = pw$fhat)
     pt2 <- abarlogfun(beta, Y, X, delta, clsize, sigma, weights, pw$Shat)
     ## rep(1, p) %o% pt1 + pt2
     ## diag(pt1) + pt2
@@ -1465,7 +1476,7 @@ omegaFun <- function(beta, Y, X, delta, clsize, weights) {
   matrix(.C("omegafun", as.double(beta), as.double(Y), as.double(X),
             as.double(delta), as.integer(clsize), as.integer(n), as.integer(p),
             as.integer(N), as.double(weights),
-            as.double(omega), PACKAGE = "aftgee")[[10]], nrow = p)
+            out = as.double(omega), PACKAGE = "aftgee")$out, nrow = p)
 }
 
 getRankName <- function(rankWeights, method) {
@@ -1542,13 +1553,15 @@ getGehan <- function(Y, X, beta, N, delta, clsize, sigma, weights, smooth = FALS
     a <- vector("double", N)
     if (smooth == TRUE) {
         out <- matrix(.C("gehan_s_wt", as.double(beta), as.double(Y), as.double(X), as.integer(clsize),
-                         as.double(sigma), as.integer(n), as.integer(p), as.integer(N), as.double(weights),
-                         as.double(a), PACKAGE = "aftgee")[[10]], ncol = 1)
+                         as.double(sigma), as.integer(n), as.integer(p),
+                         as.integer(N), as.double(weights),
+                         out = as.double(a), PACKAGE = "aftgee")$out, ncol = 1)
     }
     if (smooth == FALSE) {
-        out <- matrix(.C("gehan_ns_wt", as.double(beta), as.double(Y), as.double(X), as.integer(clsize),
+        out <- matrix(.C("gehan_ns_wt", as.double(beta), as.double(Y),
+                         as.double(X), as.integer(clsize),
                          as.integer(n), as.integer(p), as.integer(N), as.double(weights),
-                         as.double(a), PACKAGE = "aftgee")[[9]], ncol = 1) 
+                         out = as.double(a), PACKAGE = "aftgee")$out, ncol = 1) 
     }
 
     out
@@ -1595,8 +1608,10 @@ getGw <- function(Y, X, beta, N, delta, clsize, sigma, weights, rankWeights, pw 
     gw
 }
 
-getSmoothSuv <- function(Y, X, beta, N, delta, weights) {
+getSmoothSuv <- function(Y, X, beta, delta, weights) {
+    ## function(Y, X, beta, N, delta, weights) {
     en <- Y - X %*% beta
+    N <- length(Y)
     ik <- rep(1:N, each=N)
     jl <- rep(1:N, N)
     Shat <- fhat <- NULL
@@ -1637,26 +1652,19 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
   N <- length(weights)
   UnV <- zmat <- matrix(0, ncol = B, nrow = p)
   for (i in 1:B) {
-    if ( mb == TRUE) {
-      Z <- rep(rexp(length(clsize)), clsize)
-    }
-    if ( mb != TRUE) {
-      Z <- rep(1, N)
-    }
-    if (zbeta == TRUE) {
+    if (mb) Z <- rep(rexp(length(clsize)), clsize)
+    else Z <- rep(1, N)
+    if (zbeta) {
       zb <- rnorm(p)
       newbeta <- beta + n ^ (-0.5) * zb
       zmat[,i] <- zb
     }
-    if (zbeta != TRUE) {
+    if (!zbeta) {
       newbeta <- beta
     }
     sn <- vector("double", p)
-    ## if (rankWeights %in% c("nsPW", "nsGP")) {
-    ##     smooth <- FALSE
-    ## }
     gpweight <- ifelse(rankWeights %in% c("nsGP", "GP"), gpweight, 1)
-    if (smooth == TRUE) {
+    if (smooth) {
         if (rankWeights == "gehan") {
             UnV[,i] <- as.vector(.C("gehan_s_est", as.double(newbeta), as.double(Y),
                                     as.double(X), as.double(delta),
@@ -1664,7 +1672,7 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                                     as.integer(length(clsize)), as.integer(p),
                                     as.integer(sum(clsize)),
                                     as.double(weights * Z), as.double(gw),
-                                    as.double(sn), PACKAGE = "aftgee")[[12]]) # / n
+                                    out = as.double(sn), PACKAGE = "aftgee")$out) # / n
         }
         if (rankWeights %in% c("nslogrank", "logrank")) {
             UnV[,i] <- uilogFun(beta = newbeta, Y = Y, X = X, delta = delta,
@@ -1695,19 +1703,19 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                                     as.integer(length(clsize)), as.integer(p),
                                     as.integer(sum(clsize)),
                                     as.double(weights * Z), as.double(gw),
-                                    as.double(sn), PACKAGE = "aftgee")[[12]]) # / n
+                                    out = as.double(sn), PACKAGE = "aftgee")$out) # / n
         }
         if (rankWeights %in% c("PW", "GP", "eGP")) {
             pw <- getPw(Y = Y, X = X, beta = newbeta, N = nrow(X),
                          delta = delta, weights = weights, rankWeights)
             UnV[,i] <- uilogFun(beta = newbeta, Y = Y, X = X, delta = delta,
                                 clsize = clsize, sigma = sigma,
-                                n = nrow(X), Z = Z, pw =pw,
+                                n = nrow(X), Z = Z, pw = pw,
                                 weights = weights, constant = 0, rkmethod = "sm",
                                 rankWeights = rankWeights) # / n
         }
     }
-    if (smooth == FALSE) {
+    if (!smooth) {
         if (rankWeights == "gehan") {
             UnV[,i] <- as.vector(.C("gehan_ns_est", as.double(newbeta), as.double(Y),
                                     as.double(X), as.double(delta),
@@ -1715,7 +1723,7 @@ viEmp <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
                                     as.integer(length(clsize)), as.integer(p),
                                     as.integer(sum(clsize)), 
                                     as.double(weights * Z), as.double(gw),
-                                    as.double(sn), PACKAGE = "aftgee")[[11]]) # / n ## n and N?
+                                    out = as.double(sn), PACKAGE = "aftgee")$out) # / n ## n and N?
         }
         if (rankWeights %in% c("logrank", "nslogrank")) {
             UnV[,i] <- uilogFun(beta = newbeta, Y = Y, X = X, delta = delta,
@@ -1867,10 +1875,10 @@ huangFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
   ## N <- sum(clsize)
   betaTemp <- NULL
   UnMatV <- NULL
-  if (vClose == TRUE) {
+  if (vClose) {
       vi <- viClo(beta, Y, delta, X, id, weights, B, rankWeights, stratify = TRUE)$vi * n
   }
-  if (vClose != TRUE) {
+  if (!vClose) {
       vi <- viEmp(beta, Y, delta, X, id, weights, B, mb = TRUE, zbeta = FALSE,
                   smooth = FALSE, rankWeights = rankWeights, gw = gw)$vi
   }
@@ -1883,30 +1891,31 @@ huangFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), B = 500,
       if (rankWeights == "gehan") {
           bb <- BBsolve(beta, uiFun, Y = Y, X = X, delta = delta, clsize = clsize,
                         sigma = sigma, n = length(clsize), Z = Z, gw = gw,
-                        weights = weights, smooth = TRUE, constant = qq[,i] * n ^ -0.5,
+                        weights = weights, rkmethod = "sm", constant = qq[,i] * n ^ -0.5,
                         quiet = TRUE)
           newBeta[, i] <- bb$par
       }
       if (rankWeights == "logrank") {
           bb <- BBsolve(beta, uilogFun, Y = Y, X = X, delta = delta, clsize = clsize,
                         sigma = sigma, n = length(clsize), Z = Z,
-                        weights = weights, smooth = TRUE, constant = qq[,i] * n ^ -0.5,
-                        gpweight = 0, pw = rep(1, sum(clsize)),
-                        rankWeights = rankWeights, quiet = TRUE)
+                        weights = weights, constant = qq[,i] * n ^ -0.5,
+                        pw = rep(1, sum(clsize)),
+                        rankWeights = "logrank", rkmethod = "sm", quiet = TRUE)
           newBeta[, i] <- bb$par
       }
       if (rankWeights %in% c("PW", "Prentice-Wilcoxon", "GP")) {
-          gpweight <- ifelse(rankWeights %in% c("GP", "nsGP"), gpweight, 1)
+          pw <- getPw(Y = Y, X = X, beta = beta, N = nrow(X),
+                      delta = delta, weights = weights, rankWeights)
           bb <- BBsolve(beta, uilogFun, Y = Y, X = X, delta = delta, clsize = clsize,
                         sigma = sigma, n = length(clsize), Z = Z,
-                        weights = weights, smooth = TRUE, constant = qq[,i] * n ^ -0.5,
-                        gpweight = gpweight, pw = rep(1, sum(clsize)),
-                        rankWeights = rankWeights, quiet = TRUE)
+                        weights = weights, constant = qq[,i] * n ^ -0.5,
+                        pw = pw, rankWeights = rankWeights, rkmethod = "sm", quiet = TRUE)
           newBeta[, i] <- bb$par
       }
   }
   dd <- newBeta - beta
-  covmat <- n * t(dd) %*% dd
+  ## covmat <- n * t(dd) %*% dd
+  covmat <- t(dd) %*% dd
   list(covmat = covmat)
 }
 
@@ -1965,16 +1974,16 @@ isFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), sigma, B = 5
     ## n <- length(clsize)
     UnMat <- zmat <- ahat <- NULL
     An.inv <- 1
-    if (omega == TRUE && rankWeights == "gehan") {
+    if (omega && rankWeights == "gehan") {
         vi <- omegaFun(beta, Y, X, delta, clsize, weights) * n## / n ^ 2
     }
-    if (omega != TRUE && vClose == TRUE && rankWeights == "gehan") {
+    if (!omega && vClose && rankWeights == "gehan") {
         vi <- viClo(beta, Y, delta, X, id, weights, B, gw = gw, stratify = TRUE)$vi * n
     }
-    if (omega != TRUE && vClose == TRUE && rankWeights == "logrank") {
+    if (!omega && vClose && rankWeights != "gehan") {## == "logrank") {
         vi <- viClo(beta, Y, delta, X, id, weights, B, "logrank", stratify = TRUE)$vi * n
     }
-    if (omega != TRUE && vClose != TRUE) {
+    if (!omega && !vClose) {
         vi <- viEmp(beta, Y, delta, X, id, weights, B, mb = TRUE, zbeta = FALSE,
                     gw = gw, rankWeights = rankWeights)$vi
     }
@@ -1985,7 +1994,7 @@ isFun <- function(beta, Y, delta, X, id, weights = rep(1, nrow(X)), sigma, B = 5
         An <- abarlogfun(beta, Y, X, delta, clsize, sigma, weights)
     }
     if (rankWeights %in% c("PW", "GP", "Prentice-Wilcoxon")) {
-        pw <- getSmoothSuv(Y, X, beta, n, delta, weights)
+        pw <- getSmoothSuv(Y, X, beta, delta, weights)
         An <- abarpwfun(beta, Y, X, delta, clsize, sigma, weights, pw)
     }
 
@@ -2015,7 +2024,7 @@ uilogFun <- function(beta, Y, X, delta, clsize, sigma, n, Z,
                   as.double(delta), as.integer(clsize),
                   as.double(sigma), as.integer(n), as.integer(p),
                   as.integer(N), as.double(Z * weights),
-                  as.double(pw), as.double(sn), PACKAGE = "aftgee")[[12]]
+                  as.double(pw), out = as.double(sn), PACKAGE = "aftgee")$out
     }
     if (rkmethod == "nonsm") {
         pw <- getPw(Y = Y, X = X, beta = beta, N = N, delta = delta,
@@ -2024,7 +2033,7 @@ uilogFun <- function(beta, Y, X, delta, clsize, sigma, n, Z,
                   as.double(delta), as.integer(clsize),
                   as.integer(n), as.integer(p),
                   as.integer(N), as.double(Z * weights),
-                  as.double(pw), as.double(sn), PACKAGE = "aftgee")[[11]]
+                  as.double(pw), out = as.double(sn), PACKAGE = "aftgee")$out
     }
     ans - constant
 }
@@ -2037,7 +2046,7 @@ uiFun <- function(beta, Y, X, delta, clsize, sigma, n, Z, weights, smooth = TRUE
   ans <- .C("gehan_s_est", as.double(beta), as.double(Y), as.double(X), as.double(delta),
             as.integer(clsize), as.double(sigma), as.integer(n), as.integer(p),
             as.integer(N), as.double(Z * weights), as.double(gw),
-            as.double(sn), PACKAGE = "aftgee")[[12]]
+            out = as.double(sn), PACKAGE = "aftgee")$out
   ans <- ans - constant
 }
 
