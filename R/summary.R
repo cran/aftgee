@@ -1,9 +1,7 @@
 #' @export
 summary.aftgee <- function(object,...){
   z <- object
-  if (class(z) != "aftgee"){
-    stop("Most be aftgee class")
-  }
+  if (!is.aftgee(z)) stop("Most be aftgee class")
   ans <- z["call"]
   TAB.ini <- NULL
   ## aftgee part
@@ -28,9 +26,7 @@ summary.aftgee <- function(object,...){
 #' @export
 summary.aftsrr <- function(object,...){
   z <- object
-  if (class(z) != "aftsrr"){
-    stop("Most be aftsrr class")
-  }
+  if (!is.aftsrr(z)) stop("Most be aftsrr class")
   ans <- z["call"]
   var.meth <- z$var.meth[z$var.meth %in%
                          c("NULL", "bootstrap", "MB", "ZLCF", "ZLMB", "sHCF", "sHMB", "ISCF", "ISMB", "js")]
@@ -78,3 +74,68 @@ print.summary.aftsrr <- function(x, ...){
   }
 }
 
+#' @noRd
+formatPerc <- function (probs, digits) 
+  paste(format(100 * probs, trim = TRUE, scientific = FALSE, digits = digits), "%")
+
+#' @importFrom stats qnorm setNames
+#' @export
+confint.aftsrr <- function(object, parm, level = 0.95, ...) {
+  cf <- coef(object)
+  pnames <- names(cf)
+  object$covmat <- object$covmat[!is.na(object$covmat)]
+  if (!length(object$covmat))
+    stop("Missing covariance-variance estimate.")
+  vnames <- names(object$covmat)
+  ses <- lapply(object$covmat, function(e) {
+    ses <- sqrt(diag(e))
+    names(ses) <- pnames
+    return(ses)
+  })
+  if (is.matrix(cf)) 
+    cf <- setNames(as.vector(cf), pnames)
+  if (missing(parm)) 
+    parm <- pnames
+  else if (is.numeric(parm)) 
+    parm <- pnames[parm]
+  a <- (1 - level)/2
+  a <- c(a, 1 - a) 
+  fac <- qnorm(a)
+  ciList <- lapply(ses, function(e) {
+    pct <- formatPerc(a, 3)
+    ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
+    ci[] <- cf[parm] + e[parm] %o% fac
+    ci
+  })
+  for (i in 1:length(ciList)) {
+    cat("\n")
+    cat("Variance Estimator:", as.character(names(ciList)[i]))
+    cat("\n")
+    print(ciList[[i]])
+  }
+  invisible(ciList)  
+}
+
+#' @export
+confint.aftgee <- function(object, parm, level = 0.95, ...) {
+  cf <- coef(object)
+  pnames <- names(cf)
+  ses <- sqrt(diag(vcov(object)))
+  names(ses) <- pnames
+  if (is.matrix(cf)) 
+    cf <- setNames(as.vector(cf), pnames)
+  if (missing(parm)) 
+    parm <- pnames
+  else if (is.numeric(parm)) 
+    parm <- pnames[parm]
+  a <- (1 - level)/2
+  a <- c(a, 1 - a) 
+  fac <- qnorm(a)
+  pct <- formatPerc(a, 3)
+  ci <- array(NA_real_, dim = c(length(parm), 2L), dimnames = list(parm, pct))
+  ci[] <- cf[parm] + ses[parm] %o% fac
+  ci
+}
+
+is.aftgee <- function(x) inherits(x, "aftgee")
+is.aftsrr <- function(x) inherits(x, "aftsrr")

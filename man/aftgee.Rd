@@ -12,7 +12,8 @@ aftgee(
   contrasts = NULL,
   weights = NULL,
   margin = NULL,
-  corstr = "independence",
+  corstr = c("independence", "exchangeable", "ar1", "unstructured", "userdefined",
+    "fixed"),
   binit = "srrgehan",
   B = 100,
   control = aftgee.control()
@@ -104,13 +105,18 @@ datgen <- function(n = 100, tau = 0.3, dim = 2) {
 }
 set.seed(1); dat <- datgen(n = 50, dim = 2)
 fm <- Surv(Time, status) ~ x1 + x2
-summary(aftgee(fm, data = dat, id = id, corstr = "ind", B = 8))
-summary(aftgee(fm, data = dat, id = id, corstr = "ex", B = 8))
+fit1 <- aftgee(fm, data = dat, id = id, corstr = "ind")
+fit2 <- aftgee(fm, data = dat, id = id, corstr = "ex")
+summary(fit1)
+summary(fit2)
+
+confint(fit1)
+confint(fit2)
 }
 \references{
 Chiou, S., Kim, J. and Yan, J. (2014) Marginal Semiparametric Multivariate
 Accelerated Failure Time Model with Generalized Estimating Equation.
-\emph{Life Time Data}, \bold{20}(4): 599--618.
+\emph{Lifetime Data Analysis}, \bold{20}(4): 599--618.
 
 Jin, Z. and Lin, D. Y. and Ying, Z. (2006)
 On Least-squares Regression with Censored Data. \emph{Biometrika}, \bold{90}, 341--353.
