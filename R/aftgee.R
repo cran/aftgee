@@ -120,7 +120,7 @@ aftgee <- function(formula, data, subset, id = NULL, contrasts = NULL,
     cat("There is no censoring in the data, ordinary least squares approach is fitted via geese.\n")
     out$geese <- geese(as.formula(paste("log(time) ~ ", formula)[2]),
                        weights = weights, id = id, data = DF, corstr = corstr)
-    out$coef.init <- out$coef.res <- out$geese$beta
+    out$coef.init <- out$coef.res <- as.numeric(out$geese$beta)
     out$coefficients <- cbind(out$coef.init, out$coef.res)
     out$var.res <- out$geese$vbeta
   }
@@ -196,9 +196,9 @@ aftgee.fit <- function(DF, corstr="independence",
       bsamp <- matrix(NA, nrow = B, ncol = length(result$beta))
       bini <- result$beta
       if (control$seIni) {
-        Z <- as.vector(rep(rexp(n, 1), time = clsize))
-        zsamp[[i]] <- Z
         for (i in 1:B) {
+          Z <- as.vector(rep(rexp(n, 1), time = clsize))
+          zsamp[[i]] <- Z
           DF0 <- DF
           DF0$weights <- Z * DF0$weights
           bini <- rankFit.gehan.is(DF0[,-5], engine, NULL)$beta
@@ -207,10 +207,13 @@ aftgee.fit <- function(DF, corstr="independence",
                                   DF$margin, DF$weights, control)$beta
         }
       } else {
-        bsamp <- resampling_No_Margin(y = log(DF$time), X = x, D = DF$status, b0 = binitValue$beta,
+        bsamp <- resampling_No_Margin(y = log(DF$time), X = x, D = DF$status, b0 = bini,
+                                      ## b0 = binitValue$beta,
                                       nt = tabulate(id), w = DF$weights, corstr = corstr, B = B,
                                       tol = control$reltol, maxit = control$maxit)
       }
+      ## resampling is less stable when sample size is small
+      bsamp <- bsamp[rowSums(bsamp * bsamp) < 5 * sum(bini * bini),]      
       vhat <- var(bsamp)
     } else {
       cl <- makeCluster(control$parCl)
@@ -239,7 +242,7 @@ aftgee.fit <- function(DF, corstr="independence",
   ini.sd <- c(binitValue$sd)
   ini.sdMat <- c(binitValue$sdMat)
   fit <- list(coefficients = cbind(ini.beta, result$beta),
-              coef.res = result$beta,
+              coef.res = as.numeric(result$beta),
               var.res = vhat,
               varMargin = result$gamma,
               coef.trace = result$histBeta,
@@ -252,7 +255,7 @@ aftgee.fit <- function(DF, corstr="independence",
               conv = result$convergence,
               ini.conv = firstconvergence,
               beta.resmp = bsamp,
-              zsmp = zsamp,
+              zsamp = zsamp,
               conv.step = result$convStep)
   class(fit) <- "aftgee.fit"
   fit
@@ -301,6 +304,7 @@ aftgee.est <- function(y, x, delta, beta, id,
     fit <- est_No_Margin(y = y, X = x, D = delta, b0 = beta, nt = tabulate(id),
                          w = Z * weights, corstr = corstr,
                          tol = control$reltol, maxit = control$maxiter)
+    fit$hist_b <- lapply(fit$hist_b[!sapply(fit$hist_b, is.null)], drop)    
     return(list(beta = fit$b, alpha = fit$alpha, histBeta = fit$hist_b, iniBeta = beta,
                 convergence = 1 * (fit$iter < control$maxiter),
                 convStep = fit$iter))
@@ -336,10 +340,10 @@ est.margin <- function(y, x, delta, beta, id,
       eres2[m] <- mean(temp[[2]], na.rm = TRUE)
       dum <- cumsum(ifelse(margin == m, 1, 0))
       er1[[m]] <- temp[[1]][ifelse(margin == m, dum, NA)]
-      ## er1 <- rbind(er1, er1temp)
     }
-    er1 <- unlist(er1)
+    er1 <- c(do.call(rbind, er1))
     er1 <- er1[!is.na(er1)]
+    ## sapply(1:length(y), function(i) er1[[margin[i]]][i])
     yhat <- delta * y + (1 - delta) * (er1 + xmat %*% beta)
     yhatZ <- sqrt(Z * weights) * yhat
     er2 <- as.matrix(eres2[margin])

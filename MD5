@@ -1,10 +1,10 @@
-6bf1ebd5378bd368eb9971279f34755f *DESCRIPTION
+baa82787f2d6e7fe4684e628028b5363 *DESCRIPTION
 06e83bad70a15a2945aaabfc42b4e3e3 *NAMESPACE
-1cf300278e7199ec2d4e06cbd4fd91a2 *NEWS.md
+348f98d8bc63c72db0c3bf16b69fe0e9 *NEWS.md
 88c54c32eaa15bd53dcebd4da994810b *R/QIC.R
 4fd5812634c23fc1f8fb6e2ffe92376a *R/RcppExports.R
 a4d2fbf95c788a73db0f06473cf57ad6 *R/Surv.R
-90e4b37b97abbea6110c76a8a151652f *R/aftgee.R
+08e4e078574f6f8a9e0f92e728172523 *R/aftgee.R
 b0a349f25d4d9b1ac06d8ed9eecdeec8 *R/aftgee_pkg.R
 ef4e9c492188d9e922b01f4404045001 *R/aftsrr.R
 4979b6e8d3b3510890f21d76d91578ec *R/generic.R
@@ -25,8 +25,8 @@ f470cc6b9722d869752e005a1583df51 *man/aftgee.Rd
 dfeaf6165935e7317762706ad978692e *man/export_is.Surv.Rd
 7c9cfc26440712e76b143565ca4f42b7 *src/Makevars
 eb5ba941fd2dfa774936cfcfaa5ac971 *src/RcppExports.cpp
-cb335c8121247555dec43be4465cea58 *src/aftgee.cpp
-069df27d1fc2aa973547b9b09009dba6 *src/aftsrr.c
+22569557ce31c38122f84dd86a503022 *src/aftgee.cpp
+8c99d6c6eb7ae2fd83cf3f62c424be11 *src/aftsrr.c
 5150ef2ea04aa4c2254be8de6679e00f *src/getSuv.cpp
 10ada256a3990e0d4c4b8238781a7e1e *src/init.c
 961845ec04a5abe8e4218eb30d11dd4c *src/rankFit.cpp
